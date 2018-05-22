@@ -1,0 +1,162 @@
+---
+title: "Processing experts shortlists"
+author: 
+  - Damiano Oldoni
+  - Tim Adriaens
+date: "`r Sys.Date()`"
+output:
+  html_document:
+  toc: true
+toc_depth: 3
+toc_float: true
+number_sections: true
+theme: yeti
+df_print: paged
+knit: (function(input_file, encoding) { rmarkdown::render(input_file, encoding = encoding, output_file = paste0("../docs/",sub(".Rmd", ".html", basename(input_file))))})
+---
+  
+```{r global_options, include = FALSE}
+knitr::opts_chunk$set(root.dir = "../",
+                      warning=FALSE, 
+                      message=FALSE)
+```
+
+# Load libraries
+
+```{r}
+# Work with googlesheets
+library(googlesheets)
+
+# Tidyverse packages
+library(dplyr)
+library(stringr)
+library(readr)
+library(tidyr)
+```
+
+# Import spreadsheets
+
+The experts receive a spreadsheet with a *longlist* of alien or possible future aliens. The experts can take into account species out this longlist as well. They are invited to select around 10 species individually. This judge independency is achieved by making individual spreadsheets which are not globally shared with all experts community. This strategy is at the moment experimented within vertebrates group. 
+
+The Google spreadsheets are called `ias_UKOT_vertebrates_firstname_surname.tsv` and contain two sheets, `LONGLIST` and `SHORLIST`. 
+The shortlist is structured as follows:
+
+species | country | remarks (optional)
+--- | --- | --- 
+example1 | KY, AI, BM | optional remark1
+example2 | AI, BM, MS, TC, VG, KY | optional remarks2
+example3 | TC | 
+... | ... | ...
+
+The columns `species` and  `country` are mandatory while `remarks` is optional.
+Countries should be commasperated values as shown in the table above and should contained one or more of the 6 Caribbean UKOTs.
+
+We select the spreadsheets to import:
+
+```{r select_spreadsheets}
+experts <- c("Elena_Tricarico",
+             "Fred_Burton",
+             "Ian_Winfield",
+             "Jane_Haakonsson_Sophie_O'Hehir",
+             "Latisha_Martin",
+             "Mark_Outerbridge",
+             "Nancy_Pascoe",
+             "Rose-Smyth_Christine",
+             "Jason_Berry",
+             "Tim_Adriaens")
+my_sheets <- gs_ls()
+experts_ss <- my_sheets %>% 
+  filter(str_detect(my_sheets$sheet_title, 
+                    pattern = "ias_UKOT_vertebrates"))
+experts_ss <- experts_ss %>%
+  filter(!str_detect(experts_ss$sheet_title,
+                     pattern = "ias_UKOT_vertebrates_invertebrates"))
+
+experts_ss
+```
+
+We import the shortlist by these spreadsheets:
+
+```{r import_spreadsheets}
+title_ssheets <- map(experts_ss %>% pull(sheet_title),
+                      ~ gs_title(.))
+dfs_experts <- map(
+  title_ssheets, ~ gs_read(ss = ., ws = "SHORTLIST")
+)
+names(dfs_experts) <- experts_ss %>% pull(sheet_title)
+```
+
+First, we save the most updated version of the shortlists in the directory `./data/raw/`:
+
+```{r save_raw_shortlists, echo = FALSE}
+map(names(dfs_experts), ~ write_tsv(dfs_experts[[.]], 
+                                    path = paste0("../data/raw/", .)))
+```
+
+An example from the shortlist of one expert:
+
+```{r explore}
+dfs_experts[[1]]
+```
+
+
+Tidy the dataframes (one row per species per country):
+
+```{r tidy_dfs}
+dfs_experts <- map(dfs_experts, function(x) x %>%
+                     mutate(UKOTs = str_replace_all(UKOTs, 
+                                                pattern = " ",
+                                                replace = "")))
+dfs_experts <- map(dfs_experts, 
+                   function(x) x %<>% 
+                     separate_rows(UKOTs, sep = ","))
+dfs_experts <- map(names(dfs_experts),
+                   function(x) dfs_experts[[x]] %<>%
+                     mutate(expert = x))
+```
+
+We can now combine the information provided by all experts:
+
+```{r combine_dfs_experts}
+combined_dfs <- bind_rows(dfs_experts)
+combined_counts_species <- combined_dfs %>% group_by(species, 
+                                                     UKOTs) %>%
+  count() %>%
+  ungroup()
+combined_counts_species %<>% 
+  rowwise() %>%
+  mutate(remarks = paste((combined_dfs %>% 
+           filter(species  == .$species) %>% 
+           select(`remarks (optional)`) %>% 
+             filter(!is.na(`remarks (optional)`)) %>% 
+             distinct() %>% pull()), 
+           collapse = ";")) %>% 
+  ungroup() %>%
+  distinct()
+```
+
+Which species are present in the combined shorlist?
+
+```{r number_species}
+combined_counts_species %>% 
+  distinct(species) %>% 
+  filter(!species == "Dummy Dummy") %>%
+  arrange()
+```
+
+Let's view it:
+
+```{r view_combined}
+general_species_list <- combined_counts_species %>% 
+  arrange(desc(n)) %>%
+  filter(!species == "Dummy Dummy")
+general_species_list
+```
+
+
+```{r}
+
+```
+
+
+
