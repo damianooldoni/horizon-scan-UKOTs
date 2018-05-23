@@ -472,62 +472,46 @@ library(magrittr)</code></pre>
 <pre class="r"><code>experts &lt;- c(&quot;Elena_Tricarico&quot;,
              &quot;Fred_Burton&quot;,
              &quot;Ian_Winfield&quot;,
-             &quot;Jane_Haakonsson_Sophie_O'Hehir&quot;,
+             &quot;Jane_Haakonsson_Sophie_O’Hehir&quot;,
              &quot;Latisha_Martin&quot;,
              &quot;Mark_Outerbridge&quot;,
              &quot;Nancy_Pascoe&quot;,
              &quot;Rose-Smyth_Christine&quot;,
              &quot;Jason_Berry&quot;,
+             &quot;Bryan_Manco&quot;,
              &quot;Tim_Adriaens&quot;)
+gss_experts &lt;- str_c(&quot;ias_UKOT_vertebrates_&quot;, experts, &quot;.tsv&quot;)
 my_sheets &lt;- gs_ls()
 experts_ss &lt;- my_sheets %&gt;% 
-  filter(str_detect(my_sheets$sheet_title, 
-                    pattern = &quot;ias_UKOT_vertebrates&quot;))
-experts_ss &lt;- experts_ss %&gt;%
-  filter(!str_detect(experts_ss$sheet_title,
-                     pattern = &quot;ias_UKOT_vertebrates_invertebrates&quot;))
-
-experts_ss %&gt;% select(sheet_title)</code></pre>
-<pre><code>## # A tibble: 11 x 1
-##    sheet_title                                            
-##    &lt;chr&gt;                                                  
-##  1 ias_UKOT_vertebrates_Mark_Outerbridge.tsv              
-##  2 ias_UKOT_vertebrates_Jason_Berry.tsv                   
-##  3 ias_UKOT_vertebrates_Latisha_Martin.tsv                
-##  4 ias_UKOT_vertebrates_Elena_Tricarico.tsv               
-##  5 ias_UKOT_vertebrates_Tim_Adriaens.tsv                  
-##  6 ias_UKOT_vertebrates_Jane_Haakonsson_Sophie_O’Hehir.tsv
-##  7 ias_UKOT_vertebrates_Rose-Smyth_Christine.tsv          
-##  8 ias_UKOT_vertebrates_Fred_Burton.tsv                   
-##  9 ias_UKOT_vertebrates_Sophie_O’Hehir.tsv                
-## 10 ias_UKOT_vertebrates_Nancy_Pascoe.tsv                  
-## 11 ias_UKOT_vertebrates_Ian_Winfield.tsv</code></pre>
-<p>We import the shortlist by these spreadsheets:</p>
+  filter(sheet_title %in% gss_experts)
+experts_ss &lt;- map_dfr(unique(experts_ss$sheet_title), 
+                      function(x) experts_ss %&gt;% 
+                        filter(sheet_title == x) %&gt;%
+                        filter(updated == max(updated)))
+experts_ss$sheet_title</code></pre>
+<pre><code>##  [1] &quot;ias_UKOT_vertebrates_Mark_Outerbridge.tsv&quot;              
+##  [2] &quot;ias_UKOT_vertebrates_Bryan_Manco.tsv&quot;                   
+##  [3] &quot;ias_UKOT_vertebrates_Jason_Berry.tsv&quot;                   
+##  [4] &quot;ias_UKOT_vertebrates_Latisha_Martin.tsv&quot;                
+##  [5] &quot;ias_UKOT_vertebrates_Elena_Tricarico.tsv&quot;               
+##  [6] &quot;ias_UKOT_vertebrates_Tim_Adriaens.tsv&quot;                  
+##  [7] &quot;ias_UKOT_vertebrates_Jane_Haakonsson_Sophie_O’Hehir.tsv&quot;
+##  [8] &quot;ias_UKOT_vertebrates_Rose-Smyth_Christine.tsv&quot;          
+##  [9] &quot;ias_UKOT_vertebrates_Fred_Burton.tsv&quot;                   
+## [10] &quot;ias_UKOT_vertebrates_Nancy_Pascoe.tsv&quot;                  
+## [11] &quot;ias_UKOT_vertebrates_Ian_Winfield.tsv&quot;</code></pre>
+<p>We import the experts’ shortlists by these spreadsheets:</p>
+<pre class="r"><code>title_ssheets &lt;- map(experts_ss$sheet_title, ~ gs_title(.))
+dfs_experts &lt;- map(
+  title_ssheets, ~ gs_read(ss = ., ws = &quot;SHORTLIST&quot;)
+)
+names(dfs_experts) &lt;- experts_ss %&gt;% pull(sheet_title)</code></pre>
 <p>First, we save the most updated version of the shortlists in the directory <code>./data/raw/</code>:</p>
-<pre><code>## [[1]]
-## # A tibble: 1 x 3
-##   species     UKOTs      `remarks (optional)`
-##   &lt;chr&gt;       &lt;chr&gt;      &lt;lgl&gt;               
-## 1 Dummy Dummy AI, KY, MS NA                  
-## 
-## [[2]]
-## # A tibble: 11 x 3
-##    species                   UKOTs  `remarks (optional)`               
-##    &lt;chr&gt;                     &lt;chr&gt;  &lt;chr&gt;                              
-##  1 Iguana iguana             AI, TC &lt;NA&gt;                               
-##  2 Anolis equestris          KY     &lt;NA&gt;                               
-##  3 Procyon lotor             KY     &lt;NA&gt;                               
-##  4 Python molurus bivittatus KY     &lt;NA&gt;                               
-##  5 Boa constrictor imperator KY     &lt;NA&gt;                               
-##  6 Bufo marinus              KY     &lt;NA&gt;                               
-##  7 Herpestes auropunctatus   KY     &lt;NA&gt;                               
-##  8 Herpestes javanicus       KY     &lt;NA&gt;                               
-##  9 Pantherophis guttatus     &lt;NA&gt;   Present in KY                      
-## 10 Pitangus sulphuratus      TC     &lt;NA&gt;                               
-## 11 Estrilda astrild          KY     Agricultural impact, seed dispersal
-## 
-## [[3]]
-## # A tibble: 11 x 3
+<pre class="r"><code>map(names(dfs_experts), ~ write_tsv(dfs_experts[[.]], 
+                                    path = paste0(&quot;../data/raw/&quot;, .)))</code></pre>
+<p>An example from the shortlist of one expert:</p>
+<pre class="r"><code>dfs_experts[[4]]</code></pre>
+<pre><code>## # A tibble: 11 x 3
 ##    species                   UKOTs `remarks (optional)`
 ##    &lt;chr&gt;                     &lt;chr&gt; &lt;lgl&gt;               
 ##  1 Canis familiaris          VG    NA                  
@@ -540,110 +524,7 @@ experts_ss %&gt;% select(sheet_title)</code></pre>
 ##  8 Caiman crocodilus         VG    NA                  
 ##  9 Python molurus bivittatus VG    NA                  
 ## 10 Ramphotyphlops braminus   VG    NA                  
-## 11 Eleutherodactylus cocqui  VG    NA                  
-## 
-## [[4]]
-## # A tibble: 19 x 3
-##    species                    UKOTs                  `remarks (optional)` 
-##    &lt;chr&gt;                      &lt;chr&gt;                  &lt;chr&gt;                
-##  1 Gambusia sp.               AI, BM, KY, MS, TC, VG To double check with~
-##  2 Oreochromis sp.            AI, BM, KY, MS, TC, VG To double check with~
-##  3 Iguana iguana              BM, TC, VG             &lt;NA&gt;                 
-##  4 Bufo marinus               MS                     &lt;NA&gt;                 
-##  5 Eleutherodactylus cocqui   AI, BM, KY, MS, TC, VG &lt;NA&gt;                 
-##  6 Molothrus bonariensis      AI, BM, KY, MS, TC, VG &lt;NA&gt;                 
-##  7 Myiopsitta monachus        AI, BM, MS, TC, VG     &lt;NA&gt;                 
-##  8 Oryctolagus cuniculus      AI, BM, KY, MS, TC, VG &lt;NA&gt;                 
-##  9 Capra hircus               BM, KY, VG             &lt;NA&gt;                 
-## 10 Anolis carolinensis        BM, KY, MS, TC, VG     &lt;NA&gt;                 
-## 11 Tilapia zillii             AI, BM, KY, MS, TC, VG To double check with~
-## 12 Osteopilus septentrionalis BM, MS                 &lt;NA&gt;                 
-## 13 Pantherophis guttatus      AI, BM, MS, TC, VG     &lt;NA&gt;                 
-## 14 Sturnus vulgaris           AI, KY, MS, TC, VG     &lt;NA&gt;                 
-## 15 Sus scrofa                 AI, KY, TC, VG         &lt;NA&gt;                 
-## 16 Gastrophryne carolinensis  AI, BM, MS, TC, VG     &lt;NA&gt;                 
-## 17 Herpestes auropunctatus    KY, MS, TC             &lt;NA&gt;                 
-## 18 Mus musculus               MS, TC                 &lt;NA&gt;                 
-## 19 Passer domesticus          AI, KY, MS, TC, VG     &lt;NA&gt;                 
-## 
-## [[5]]
-## # A tibble: 35 x 3
-##    species                   UKOTs                  `remarks (optional)`
-##    &lt;chr&gt;                     &lt;chr&gt;                  &lt;lgl&gt;               
-##  1 Acridotheres cristatellus AI, BM, KY, MS, TC, VG NA                  
-##  2 Acridotheres tristis      AI, BM, KY, MS, TC, VG NA                  
-##  3 Anolis carolinensis       AI, BM, MS, TC, VG     NA                  
-##  4 Anolis equestris          AI, BM, MS, TC, VG     NA                  
-##  5 Anolis grahami            AI, KY, MS, TC, VG     NA                  
-##  6 Anolis sagrei             AI, BM, MS             NA                  
-##  7 Aratinga erythrogenys     AI, BM, MS, TC, VG     NA                  
-##  8 Axis axis                 AI, BM, KY, MS, TC, VG NA                  
-##  9 Boiga irregularis         AI, BM, KY, MS, TC, VG NA                  
-## 10 Callosciurus erythreaus   AI, BM, KY, MS, TC, VG NA                  
-## # ... with 25 more rows
-## 
-## [[6]]
-## # A tibble: 27 x 3
-##    species                   UKOTs                  `remarks (optional)`  
-##    &lt;chr&gt;                     &lt;chr&gt;                  &lt;chr&gt;                 
-##  1 Acridotheres cristatellus AI, BM, KY, MS, TC, VG &lt;NA&gt;                  
-##  2 Acridotheres tristis      AI, BM, KY, MS, TC, VG interisland transfer ~
-##  3 Amazona auropalliata      AI, BM, KY, MS, TC, VG &lt;NA&gt;                  
-##  4 Amazona ochrocephala      AI, BM, MS, TC, VG     &lt;NA&gt;                  
-##  5 Anolis equestris          AI, BM, MS, TC, VG     knight anole          
-##  6 Bufo marinus              TC, VG                 &lt;NA&gt;                  
-##  7 Capra hircus              AI, BM, KY, MS, TC     feral goat            
-##  8 Felis catus               AI, BM, MS             &lt;NA&gt;                  
-##  9 Gallus gallus             MS, TC                 feral chicken         
-## 10 Iguana iguana             AI, BM, TC             &lt;NA&gt;                  
-## # ... with 17 more rows
-## 
-## [[7]]
-## # A tibble: 2 x 3
-##   species                 UKOTs              `remarks (optional)`
-##   &lt;chr&gt;                   &lt;chr&gt;              &lt;lgl&gt;               
-## 1 Ramphotyphlops braminus AI, BM, MS, TC, VG NA                  
-## 2 Myiopsitta monachus     AI, BM, MS, TC, VG NA                  
-## 
-## [[8]]
-## # A tibble: 33 x 3
-##    species               UKOTs                  `remarks (optional)`      
-##    &lt;chr&gt;                 &lt;chr&gt;                  &lt;chr&gt;                     
-##  1 Amazona ochrocephala  AI, BM, MS, TC, VG     Hybridization risk        
-##  2 Anas platyrhynchos    AI, MS, TC, VG         &lt;NA&gt;                      
-##  3 Anolis carolinensis   AI, BM, MS, TC, VG     moderate impact           
-##  4 Anolis equestris      AI, BM, MS, TC, VG     high impact on KY, Record~
-##  5 Anolis grahami        AI, KY, MS, TC, VG     &lt;NA&gt;                      
-##  6 Anolis sagrei         AI, BM, MS             high impact on KY, nb nat~
-##  7 Aratinga erythrogenys AI, BM, MS, TC, VG     present on KY             
-##  8 Aratinga pertinax     AI, BM, KY, MS, TC, VG &lt;NA&gt;                      
-##  9 Capra hircus          AI, BM, KY, MS, TC     moderate impact           
-## 10 Cyclura nubila        KY                     recorded in GCM, potentia~
-## # ... with 23 more rows
-## 
-## [[9]]
-## # A tibble: 1 x 3
-##   species     UKOTs      `remarks (optional)`
-##   &lt;chr&gt;       &lt;chr&gt;      &lt;lgl&gt;               
-## 1 Dummy Dummy AI, KY, MS NA                  
-## 
-## [[10]]
-## # A tibble: 1 x 3
-##   species     UKOTs      `remarks (optional)`
-##   &lt;chr&gt;       &lt;chr&gt;      &lt;lgl&gt;               
-## 1 Dummy Dummy AI, KY, MS NA                  
-## 
-## [[11]]
-## # A tibble: 1 x 3
-##   species     UKOTs      `remarks (optional)`
-##   &lt;chr&gt;       &lt;chr&gt;      &lt;lgl&gt;               
-## 1 Dummy Dummy AI, KY, MS NA</code></pre>
-<p>An example from the shortlist of one expert:</p>
-<pre class="r"><code>dfs_experts[[1]]</code></pre>
-<pre><code>## # A tibble: 1 x 3
-##   species     UKOTs      `remarks (optional)`
-##   &lt;chr&gt;       &lt;chr&gt;      &lt;lgl&gt;               
-## 1 Dummy Dummy AI, KY, MS NA</code></pre>
+## 11 Eleutherodactylus cocqui  VG    NA</code></pre>
 <p>Tidy the dataframes (one row per species per country):</p>
 <pre class="r"><code>dfs_experts &lt;- map(dfs_experts, function(x) x %&gt;%
                      mutate(UKOTs = str_replace_all(UKOTs, 
@@ -660,63 +541,101 @@ dfs_experts &lt;- map(names(dfs_experts),
 combined_counts_species &lt;- combined_dfs %&gt;% group_by(species, 
                                                      UKOTs) %&gt;%
   count() %&gt;%
-  ungroup()
-combined_counts_species %&lt;&gt;% 
-  rowwise() %&gt;%
-  mutate(remarks = paste((combined_dfs %&gt;% 
-           filter(species  == .$species) %&gt;% 
-           select(`remarks (optional)`) %&gt;% 
-             filter(!is.na(`remarks (optional)`)) %&gt;% 
-             distinct() %&gt;% pull()), 
-           collapse = &quot;;&quot;)) %&gt;% 
-  ungroup() %&gt;%
-  distinct()</code></pre>
+  ungroup() %&gt;% 
+  distinct()
+
+# combined_counts_species %&lt;&gt;% 
+#   rowwise() %&gt;%
+#   mutate(remarks = paste((combined_dfs %&gt;% 
+#            filter(species  == .$species) %&gt;% 
+#            select(`remarks (optional)`) %&gt;% 
+#              filter(!is.na(`remarks (optional)`)) %&gt;% 
+#              distinct() %&gt;% pull()), 
+#            collapse = &quot;;&quot;)) %&gt;% 
+#   ungroup() %&gt;%
+#   distinct()</code></pre>
 <p>Which species are present in the combined shorlist?</p>
-<pre class="r"><code>combined_counts_species %&gt;% 
-  distinct(species) %&gt;% 
-  filter(!species == &quot;Dummy Dummy&quot;) %&gt;%
-  arrange()</code></pre>
-<pre><code>## # A tibble: 73 x 1
-##    species                  
-##    &lt;chr&gt;                    
-##  1 Acridotheres cristatellus
-##  2 Acridotheres tristis     
-##  3 Amazona auropalliata     
-##  4 Amazona ochrocephala     
-##  5 Anas platyrhynchos       
-##  6 Anolis carolinensis      
-##  7 Anolis equestris         
-##  8 Anolis grahami           
-##  9 Anolis sagrei            
-## 10 Aratinga erythrogenys    
-## # ... with 63 more rows</code></pre>
-<p>Let’s view it:</p>
 <pre class="r"><code>general_species_list &lt;- combined_counts_species %&gt;% 
   arrange(desc(n)) %&gt;%
-  filter(!species == &quot;Dummy Dummy&quot;)
-general_species_list</code></pre>
-<pre><code>## # A tibble: 353 x 4
-##    species                 UKOTs     n remarks                            
-##    &lt;chr&gt;                   &lt;chr&gt; &lt;int&gt; &lt;chr&gt;                              
-##  1 Myiopsitta monachus     AI        5 Present in KY;Agricultural impact,~
-##  2 Myiopsitta monachus     BM        5 Present in KY;Agricultural impact,~
-##  3 Myiopsitta monachus     MS        5 Present in KY;Agricultural impact,~
-##  4 Myiopsitta monachus     TC        5 Present in KY;Agricultural impact,~
-##  5 Myiopsitta monachus     VG        5 Present in KY;Agricultural impact,~
-##  6 Capra hircus            BM        4 Present in KY;Agricultural impact,~
-##  7 Capra hircus            KY        4 Present in KY;Agricultural impact,~
-##  8 Herpestes auropunctatus KY        4 Present in KY;Agricultural impact,~
-##  9 Iguana iguana           TC        4 Present in KY;Agricultural impact,~
-## 10 Molothrus bonariensis   VG        4 Present in KY;Agricultural impact,~
-## # ... with 343 more rows</code></pre>
-<p>Let’s see an overview of species with the number of assessors. In case the same species has different number of assessors for different UKOTs, take the maximum.</p>
+  filter(!species == &quot;Dummy Dummy&quot;)</code></pre>
+<p>To a better overview, let’s spread by UKOTs:</p>
+<pre class="r"><code>general_species_list_spread &lt;- spread(general_species_list, key = UKOTs, value = n)
+general_species_list_spread</code></pre>
+<pre><code>## # A tibble: 85 x 7
+##    species                      AI    BM    KY    MS    TC    VG
+##    &lt;chr&gt;                     &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
+##  1 Acridotheres cristatellus     2     2     2     2     2     2
+##  2 Acridotheres tristis          2     2     2     2     2     2
+##  3 Amazona auropalliata          1     1     1     1     1     1
+##  4 Amazona ochrocephala          2     2    NA     2     2     2
+##  5 Anas platyrhynchos            1    NA    NA     1     1     1
+##  6 Anolis carolinensis           2     3     1     3     3     3
+##  7 Anolis equestris              3     3     1     3     3     3
+##  8 Anolis grahami                2    NA     2     2     2     2
+##  9 Anolis sagrei                 2     2    NA     2    NA    NA
+## 10 Aratinga erythrogenys         3     3    NA     3     3     3
+## # ... with 75 more rows</code></pre>
+<p>And save it:</p>
+<pre class="r"><code>write_tsv(general_species_list_spread, path = &quot;../data/output/general_species_list_spread.tsv&quot;)</code></pre>
+<p>It could be also important to have an overview of species combined with the number of experts who judge them present in the horizon. In case the same species has different number of assessors for different UKOTs, take the maximum.</p>
 <pre class="r"><code>overview_species &lt;- general_species_list %&gt;% 
   group_by(species) %&gt;% 
   summarize(n_experts = max(n)) %&gt;%
-  arrange(desc(n_experts))</code></pre>
-<p>Let’s save it in <code>../data/outputs/first_round_as_UKOTs.tsv</code>:</p>
+  arrange(desc(n_experts))
+overview_species</code></pre>
+<pre><code>## # A tibble: 85 x 2
+##    species                 n_experts
+##    &lt;chr&gt;                       &lt;dbl&gt;
+##  1 Capra hircus                   5.
+##  2 Myiopsitta monachus            5.
+##  3 Herpestes auropunctatus        4.
+##  4 Iguana iguana                  4.
+##  5 Molothrus bonariensis          4.
+##  6 Procyon lotor                  4.
+##  7 Anolis carolinensis            3.
+##  8 Anolis equestris               3.
+##  9 Aratinga erythrogenys          3.
+## 10 Canis familiaris               3.
+## # ... with 75 more rows</code></pre>
+<p>Let’s save it in <code>../data/output/first_round_as_UKOTs.tsv</code>:</p>
 <pre class="r"><code>write_tsv(overview_species,
-          path = &quot;../data/outputs/first_round_as_UKOTs.tsv&quot;)</code></pre>
+          path = &quot;../data/output/first_round_as_UKOTs.tsv&quot;)</code></pre>
+</div>
+<div id="focus-on-shortlists" class="section level1">
+<h1>Focus on shortlists</h1>
+<p>Experts should now start to set scores for species in the combined shortlist. In order to help them in doing it, we provide them a selection of the unified checklist with GBIF number of occurrences based on the species in the combined shorlist.</p>
+<p>First we have to get the cleaned and complete longlist which has been saved as a googlesheet as explained in <code>workflow_retrieve_GBIF_checklist_dplyr.Rmd</code>:</p>
+<pre class="r"><code>my_sheets &lt;- gs_ls()
+google_ssheet &lt;- my_sheets %&gt;% 
+  filter(str_detect(my_sheets$sheet_title, 
+                    pattern = &quot;ias_UKOT_vertebrates_invertebrates&quot;))
+google_ssheet %&lt;&gt;%
+  filter(updated == max(google_ssheet$updated)) # take the most recent version
+unified_checklist_vert &lt;- gs_key(google_ssheet$sheet_key) %&gt;% gs_read(ws = &quot;LONGLIST&quot;)</code></pre>
+<p>We select the species which are in the shortlists:</p>
+<pre class="r"><code>combined_shortlist_occ &lt;- unified_checklist_vert %&gt;%
+  filter(Species %in% general_species_list$species)
+combined_shortlist_occ</code></pre>
+<pre><code>## # A tibble: 58 x 17
+##    Species        AI    BM    KY    MS    TC    VG organism_type  synonyms
+##    &lt;chr&gt;       &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt;          &lt;chr&gt;   
+##  1 Amazona oc~    NA    NA    41    NA    NA    NA Vertebrate - ~ &lt;NA&gt;    
+##  2 Anas platy~    NA  1857    NA    NA    NA    NA Vertebrate - ~ &lt;NA&gt;    
+##  3 Anolis car~     2     1     1    NA     1    NA Vertebrate - ~ &lt;NA&gt;    
+##  4 Anolis equ~    NA    NA    NA    NA    NA    NA Vertebrate - ~ &lt;NA&gt;    
+##  5 Anolis gra~    NA   608    17    NA    NA    NA vertebrate - ~ &lt;NA&gt;    
+##  6 Anolis sag~     2    NA   362    NA     6     8 Vertebrate - ~ &lt;NA&gt;    
+##  7 Aratinga e~    NA    NA    NA    NA    NA    NA Vertebrate - ~ &lt;NA&gt;    
+##  8 Aratinga p~    NA    NA    NA    NA    NA     3 Vertebrate - ~ &lt;NA&gt;    
+##  9 Boa constr~    NA    NA    NA    NA    NA    NA Vertebrate - ~ &lt;NA&gt;    
+## 10 Bos taurus     NA    NA    NA    NA    NA     1 &quot;Vertebrate -~ &lt;NA&gt;    
+## # ... with 48 more rows, and 8 more variables: common_names &lt;chr&gt;,
+## #   broad_habitat &lt;chr&gt;, exotic_in &lt;chr&gt;, invasive_in &lt;chr&gt;,
+## #   main_reference &lt;chr&gt;, checklist &lt;chr&gt;, origin &lt;chr&gt;, phylum &lt;chr&gt;</code></pre>
+<p>We save it as an output in order to share it with experts for starting scoring:</p>
+<pre class="r"><code>write_tsv(
+  combined_shortlist_occ, 
+  path = &quot;../data/filter_combined_shortlist_from_unified_checklist.tsv&quot;)</code></pre>
 </div>
 
 

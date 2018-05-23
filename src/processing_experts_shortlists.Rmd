@@ -65,6 +65,7 @@ experts <- c("Elena_Tricarico",
              "Nancy_Pascoe",
              "Rose-Smyth_Christine",
              "Jason_Berry",
+             "Bryan_Manco",
              "Tim_Adriaens")
 gss_experts <- str_c("ias_UKOT_vertebrates_", experts, ".tsv")
 my_sheets <- gs_ls()
@@ -79,7 +80,7 @@ experts_ss$sheet_title
 
 We import the experts' shortlists by these spreadsheets:
 
-```{r import_spreadsheets, include = FALSE}
+```{r import_spreadsheets, results= "hide"}
 title_ssheets <- map(experts_ss$sheet_title, ~ gs_title(.))
 dfs_experts <- map(
   title_ssheets, ~ gs_read(ss = ., ws = "SHORTLIST")
@@ -89,7 +90,7 @@ names(dfs_experts) <- experts_ss %>% pull(sheet_title)
 
 First, we save the most updated version of the shortlists in the directory `./data/raw/`:
 
-```{r save_raw_shortlists, echo = FALSE}
+```{r save_raw_shortlists, results = "hide"}
 map(names(dfs_experts), ~ write_tsv(dfs_experts[[.]], 
                                     path = paste0("../data/raw/", .)))
 ```
@@ -97,7 +98,7 @@ map(names(dfs_experts), ~ write_tsv(dfs_experts[[.]],
 An example from the shortlist of one expert:
 
 ```{r explore}
-dfs_experts[[1]]
+dfs_experts[[4]]
 ```
 
 
@@ -140,41 +141,34 @@ combined_counts_species <- combined_dfs %>% group_by(species,
 
 Which species are present in the combined shorlist?
 
-```{r number_species}
-combined_counts_species %>% 
-  distinct(species) %>% 
-  filter(!species == "Dummy Dummy") %>%
-  arrange()
-```
-
-Let's view it:
-
-```{r view_combined}
+```{r general_species_list}
 general_species_list <- combined_counts_species %>% 
   arrange(desc(n)) %>%
   filter(!species == "Dummy Dummy")
-general_species_list
 ```
 
-To a better overview:
+To a better overview, let's spread by UKOTs:
 
 ```{r spread_table}
 general_species_list_spread <- spread(general_species_list, key = UKOTs, value = n)
+general_species_list_spread
 ```
 
-Let's save it:
+And save it:
+
 ```{r save_spread_table}
 write_tsv(general_species_list_spread, path = "../data/output/general_species_list_spread.tsv")
 ```
 
 
-Let's see an overview of species with the number of assessors. In case the same species has different number of assessors for different UKOTs, take the maximum.
+It could be also important to have an overview of species combined with the number of experts who judge them present in the horizon. In case the same species has different number of assessors for different UKOTs, take the maximum.
 
-```{r}
+```{r species_number_experts}
 overview_species <- general_species_list %>% 
   group_by(species) %>% 
   summarize(n_experts = max(n)) %>%
   arrange(desc(n_experts))
+overview_species
 ```
 
 Let's save it in `../data/output/first_round_as_UKOTs.tsv`:
@@ -186,29 +180,33 @@ write_tsv(overview_species,
 
 # Focus on shortlists
 
-Let's focus GBIF occurrences for the species in the combined shorlist. First we have to get the cleaned and complete longlist which has been saved as googlesheet as explained in `workflow_retrieve_GBIF_checklist_dplyr.Rmd`:
+Experts should now start to set scores for species in the combined shortlist. In order to help them in doing it, we provide them a selection of the unified checklist with GBIF number of occurrences based on the species in the combined shorlist. 
 
-```{r get_most_udpated_longlist, include = FALSE}
+First we have to get the cleaned and complete longlist which has been saved as a googlesheet as explained in `workflow_retrieve_GBIF_checklist_dplyr.Rmd`:
+
+```{r get_most_udpated_longlist, results = "hide"}
 my_sheets <- gs_ls()
 google_ssheet <- my_sheets %>% 
   filter(str_detect(my_sheets$sheet_title, 
                     pattern = "ias_UKOT_vertebrates_invertebrates"))
 google_ssheet %<>%
-  filter(updated == max(google_ssheet$updated)) # take the most updated version
-unified_checklist_vert_invert <- gs_key(google_ssheet$sheet_key) %>% gs_read(ws = "LONGLIST")
+  filter(updated == max(google_ssheet$updated)) # take the most recent version
+unified_checklist_vert <- gs_key(google_ssheet$sheet_key) %>% gs_read(ws = "LONGLIST")
 ```
 
-Experts have now to evaluate impact of species in this combined shortlist. To help them, it can be helpful to provide them with GBIF occurrence data and other information in the unified checklist:
+We select the species which are in the shortlists:
 
 ```{r}
-combined_shortlist_occ <- unified_checklist_vert_invert %>%
+combined_shortlist_occ <- unified_checklist_vert %>%
   filter(Species %in% general_species_list$species)
 combined_shortlist_occ
 ```
 
-We save it:
+We save it as an output in order to share it with experts for starting scoring:
 
 ```{r save_checklist_occ_filtered_by_shortlist}
-write_tsv()
+write_tsv(
+  combined_shortlist_occ, 
+  path = "../data/filter_combined_shortlist_from_unified_checklist.tsv")
 ```
 
