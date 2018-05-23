@@ -59,29 +59,28 @@ We select the spreadsheets to import:
 experts <- c("Elena_Tricarico",
              "Fred_Burton",
              "Ian_Winfield",
-             "Jane_Haakonsson_Sophie_O'Hehir",
+             "Jane_Haakonsson_Sophie_O’Hehir",
              "Latisha_Martin",
              "Mark_Outerbridge",
              "Nancy_Pascoe",
              "Rose-Smyth_Christine",
              "Jason_Berry",
              "Tim_Adriaens")
+gss_experts <- str_c("ias_UKOT_vertebrates_", experts, ".tsv")
 my_sheets <- gs_ls()
 experts_ss <- my_sheets %>% 
-  filter(str_detect(my_sheets$sheet_title, 
-                    pattern = "ias_UKOT_vertebrates"))
-experts_ss <- experts_ss %>%
-  filter(!str_detect(experts_ss$sheet_title,
-                     pattern = "ias_UKOT_vertebrates_invertebrates"))
-
-experts_ss %>% select(sheet_title)
+  filter(sheet_title %in% gss_experts)
+experts_ss <- map_dfr(unique(experts_ss$sheet_title), 
+                      function(x) experts_ss %>% 
+                        filter(sheet_title == x) %>%
+                        filter(updated == max(updated)))
+experts_ss$sheet_title
 ```
 
-We import the shortlist by these spreadsheets:
+We import the experts' shortlists by these spreadsheets:
 
 ```{r import_spreadsheets, include = FALSE}
-title_ssheets <- map(experts_ss %>% pull(sheet_title),
-                      ~ gs_title(.))
+title_ssheets <- map(experts_ss$sheet_title, ~ gs_title(.))
 dfs_experts <- map(
   title_ssheets, ~ gs_read(ss = ., ws = "SHORTLIST")
 )
@@ -196,14 +195,20 @@ google_ssheet <- my_sheets %>%
                     pattern = "ias_UKOT_vertebrates_invertebrates"))
 google_ssheet %<>%
   filter(updated == max(google_ssheet$updated)) # take the most updated version
-unified_checklist_vert_invert <- gs_key(google_ssheet$sheet_key) %>% gs_read(ws = "LONGLIST") %>% clean_names()
+unified_checklist_vert_invert <- gs_key(google_ssheet$sheet_key) %>% gs_read(ws = "LONGLIST")
 ```
 
 Experts have now to evaluate impact of species in this combined shortlist. To help them, it can be helpful to provide them with GBIF occurrence data and other information in the unified checklist:
 
 ```{r}
 combined_shortlist_occ <- unified_checklist_vert_invert %>%
-  filter(species %in% general_species_list$species)
+  filter(Species %in% general_species_list$species)
 combined_shortlist_occ
+```
+
+We save it:
+
+```{r save_checklist_occ_filtered_by_shortlist}
+write_tsv()
 ```
 
