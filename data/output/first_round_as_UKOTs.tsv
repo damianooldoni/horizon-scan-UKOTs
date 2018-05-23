@@ -1,6 +1,6 @@
 species	n_experts
+Capra hircus	5
 Myiopsitta monachus	5
-Capra hircus	4
 Herpestes auropunctatus	4
 Iguana iguana	4
 Molothrus bonariensis	4
@@ -9,6 +9,8 @@ Anolis carolinensis	3
 Anolis equestris	3
 Aratinga erythrogenys	3
 Canis familiaris	3
+Elaphe guttata	3
+Felis catus	3
 Python molurus bivittatus	3
 Ramphotyphlops braminus	3
 Rattus norvegicus	3
@@ -22,14 +24,13 @@ Anolis grahami	2
 Anolis sagrei	2
 Aratinga pertinax	2
 Cyclura nubila	2
-Elaphe guttata	2
 Eleutherodactylus cocqui	2
-Felis catus	2
 Gallus gallus	2
 Gastrophryne carolinensis	2
 Hemidactylus frenatus	2
 Mustela erminea	2
 Mustela nivalis	2
+Pantherophis guttatus	2
 Passer domesticus	2
 Pitangus sulphuratus	2
 Psittacula krameri	2
@@ -41,18 +42,26 @@ Axis axis	1
 Belonesox belizanus	1
 Boa constrictor imperator	1
 Boiga irregularis	1
+Bos taurus	1
 Bufo marinus	1
 Caiman crocodilus	1
 Callosciurus erythreaus	1
 Callosciurus finlaysonii	1
+Chamaeleo calyptratus	1
 Chiloscyllium punctatum	1
 Chrysemys picta	1
+Colossoma macropomum	1
+Columba livia	1
 Dasyprocta punctata	1
+Equus asinus	1
+Equus caballus	1
 Estrilda astrild	1
 Forpus passerinus	1
 Gambusia sp.	1
+Hemidactylus mabouia	1
 Herpestes javanicus	1
 Lampropeltis getula	1
+Leiocephalus carinatus	1
 Lepidodacylus lugubris	1
 Lonchura malacca	1
 Lonchura punctulata	1
@@ -61,14 +70,18 @@ Oreochromis sp.	1
 Oreochromis spp.	1
 Oryctolagus cuniculus	1
 Osteopilus septentrionalis	1
-Pantherophis guttatus	1
+Pantherophis alleghaniensis	1
 Physignathus cocincinus	1
 Platax orbicularis	1
 Psittacula eupatria	1
 Pycnonotus cafer	1
+Pygocentrus nattereri	1
 Python regius	1
 Streptopelia decaocto	1
+"Sylvilagus floridianus
+nigronuchalis"	1
 Tiaris olivacea	1
 Tilapia sp.	1
 Tilapia zillii	1
 Trichosurus vulpecula	1
+Varanus exanthematicus	1
