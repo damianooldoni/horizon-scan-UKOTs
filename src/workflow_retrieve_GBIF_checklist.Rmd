@@ -1,5 +1,5 @@
 ---
-title: "Building a Caribbean IAS checklist of chordata based on GBIF occurrences"
+title: "Building a Caribbean IAS checklist of chordata"
 author: 
 - Damiano Oldoni
 date: "`r Sys.Date()`"
