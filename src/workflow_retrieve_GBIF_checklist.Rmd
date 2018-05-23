@@ -267,14 +267,14 @@ Save file in a text file
 
 ```{r save_tsv_file}
 write_tsv(occ_vert_invert, 
-          path = "../output/ias_UKOT_vertebrates.tsv")
+          path = "../output/ias_UKOT_vertebrates_invertebrates.tsv")
 ```
 
 Next time you work on these data, you can just directly load this file by:
 
 ```{r load_tsv_file, eval = FALSE}
 occ_vert_invert <- 
-  read_tsv(file = "../output/ias_UKOT_vertebrates_.tsv")
+  read_tsv(file = "../output/ias_UKOT_vertebrates_invertebrates.tsv")
 ```
 
 # Some considerations about checklist completeness
