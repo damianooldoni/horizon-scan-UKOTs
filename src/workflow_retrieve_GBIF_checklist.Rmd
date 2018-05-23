@@ -42,6 +42,7 @@ library(janitor)
 library(lazyeval)
 library(rgbif)
 library(trias)
+library(googlesheets)
 ```
 
 Set file paths:
