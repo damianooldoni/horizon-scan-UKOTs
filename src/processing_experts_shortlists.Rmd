@@ -23,7 +23,7 @@ knitr::opts_chunk$set(root.dir = "../",
 
 # Load libraries
 
-```{r}
+```{r load_libraries}
 # Work with googlesheets
 library(googlesheets)
 
@@ -32,6 +32,8 @@ library(dplyr)
 library(stringr)
 library(readr)
 library(tidyr)
+library(purrr)
+library(magrittr)
 ```
 
 # Import spreadsheets
@@ -41,15 +43,15 @@ The experts receive a spreadsheet with a *longlist* of alien or possible future 
 The Google spreadsheets are called `ias_UKOT_vertebrates_firstname_surname.tsv` and contain two sheets, `LONGLIST` and `SHORLIST`. 
 The shortlist is structured as follows:
 
-species | country | remarks (optional)
---- | --- | --- 
-example1 | KY, AI, BM | optional remark1
-example2 | AI, BM, MS, TC, VG, KY | optional remarks2
-example3 | TC | 
-... | ... | ...
+|species|country|remarks (optional)|
+| --- | --- | --- |
+|example1|KY, AI, BM|remark1|
+|example2|AI, BM, MS, TC, VG, KY|remark2|
+|example3|TC|...|
+|    |    |    |
 
 The columns `species` and  `country` are mandatory while `remarks` is optional.
-Countries should be commasperated values as shown in the table above and should contained one or more of the 6 Caribbean UKOTs.
+Countries should be comma separated values as shown in the table above and should contain one or more of the 6 Caribbean UKOTs.
 
 We select the spreadsheets to import:
 
@@ -72,12 +74,12 @@ experts_ss <- experts_ss %>%
   filter(!str_detect(experts_ss$sheet_title,
                      pattern = "ias_UKOT_vertebrates_invertebrates"))
 
-experts_ss
+experts_ss %>% select(sheet_title)
 ```
 
 We import the shortlist by these spreadsheets:
 
-```{r import_spreadsheets}
+```{r import_spreadsheets, include = FALSE}
 title_ssheets <- map(experts_ss %>% pull(sheet_title),
                       ~ gs_title(.))
 dfs_experts <- map(
@@ -122,17 +124,19 @@ combined_dfs <- bind_rows(dfs_experts)
 combined_counts_species <- combined_dfs %>% group_by(species, 
                                                      UKOTs) %>%
   count() %>%
-  ungroup()
-combined_counts_species %<>% 
-  rowwise() %>%
-  mutate(remarks = paste((combined_dfs %>% 
-           filter(species  == .$species) %>% 
-           select(`remarks (optional)`) %>% 
-             filter(!is.na(`remarks (optional)`)) %>% 
-             distinct() %>% pull()), 
-           collapse = ";")) %>% 
-  ungroup() %>%
+  ungroup() %>% 
   distinct()
+
+# combined_counts_species %<>% 
+#   rowwise() %>%
+#   mutate(remarks = paste((combined_dfs %>% 
+#            filter(species  == .$species) %>% 
+#            select(`remarks (optional)`) %>% 
+#              filter(!is.na(`remarks (optional)`)) %>% 
+#              distinct() %>% pull()), 
+#            collapse = ";")) %>% 
+#   ungroup() %>%
+#   distinct()
 ```
 
 Which species are present in the combined shorlist?
@@ -153,10 +157,53 @@ general_species_list <- combined_counts_species %>%
 general_species_list
 ```
 
+To a better overview:
 
-```{r}
+```{r spread_table}
+general_species_list_spread <- spread(general_species_list, key = UKOTs, value = n)
+```
 
+Let's save it:
+```{r save_spread_table}
+write_tsv(general_species_list_spread, path = "../data/output/general_species_list_spread.tsv")
 ```
 
 
+Let's see an overview of species with the number of assessors. In case the same species has different number of assessors for different UKOTs, take the maximum.
+
+```{r}
+overview_species <- general_species_list %>% 
+  group_by(species) %>% 
+  summarize(n_experts = max(n)) %>%
+  arrange(desc(n_experts))
+```
+
+Let's save it in `../data/output/first_round_as_UKOTs.tsv`:
+
+```{r write_general_species_list}
+write_tsv(overview_species,
+          path = "../data/output/first_round_as_UKOTs.tsv")
+```
+
+# Focus on shortlists
+
+Let's focus GBIF occurrences for the species in the combined shorlist. First we have to get the cleaned and complete longlist which has been saved as googlesheet as explained in `workflow_retrieve_GBIF_checklist_dplyr.Rmd`:
+
+```{r get_most_udpated_longlist, include = FALSE}
+my_sheets <- gs_ls()
+google_ssheet <- my_sheets %>% 
+  filter(str_detect(my_sheets$sheet_title, 
+                    pattern = "ias_UKOT_vertebrates_invertebrates"))
+google_ssheet %<>%
+  filter(updated == max(google_ssheet$updated)) # take the most updated version
+unified_checklist_vert_invert <- gs_key(google_ssheet$sheet_key) %>% gs_read(ws = "LONGLIST") %>% clean_names()
+```
+
+Experts have now to evaluate impact of species in this combined shortlist. To help them, it can be helpful to provide them with GBIF occurrence data and other information in the unified checklist:
+
+```{r}
+combined_shortlist_occ <- unified_checklist_vert_invert %>%
+  filter(species %in% general_species_list$species)
+combined_shortlist_occ
+```
 
