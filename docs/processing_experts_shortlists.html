@@ -12,7 +12,7 @@
 <meta name="author" content="Damiano Oldoni" />
 <meta name="author" content="Tim Adriaens" />
 
-<meta name="date" content="2018-05-23" />
+<meta name="date" content="2018-05-27" />
 
 <title>Processing experts shortlists</title>
 
@@ -414,7 +414,7 @@ div.tocify {
 <h1 class="title toc-ignore">Processing experts shortlists</h1>
 <h4 class="author"><em>Damiano Oldoni</em></h4>
 <h4 class="author"><em>Tim Adriaens</em></h4>
-<h4 class="date"><em>2018-05-23</em></h4>
+<h4 class="date"><em>2018-05-27</em></h4>
 
 </div>
 
@@ -434,8 +434,8 @@ library(magrittr)</code></pre>
 </div>
 <div id="import-spreadsheets" class="section level1">
 <h1>Import spreadsheets</h1>
-<p>The experts receive a spreadsheet with a <em>longlist</em> of alien or possible future aliens. The experts can take into account species out this longlist as well. They are invited to select around 10 species individually. This judge independency is achieved by making individual spreadsheets which are not globally shared with all experts community. This strategy is at the moment experimented within vertebrates group.</p>
-<p>The Google spreadsheets are called <code>ias_UKOT_vertebrates_firstname_surname.tsv</code> and contain two sheets, <code>LONGLIST</code> and <code>SHORLIST</code>. The shortlist is structured as follows:</p>
+<p>The experts receive a spreadsheet with a <em>longlist</em> of alien or possible future aliens. The experts are invited to review it by adding additional species on it. In the column <code>checklist</code> they should write <code>expert check</code>. Each of them is invited to select around 10-20 species. Individual spreadsheets are made which are not globally shared with all experts community. At the moment this strategy is being tested within the vertebrates group.</p>
+<p>The Google spreadsheets are called in the following way: <code>ias_UKOT_vertebrates_firstname_surname.tsv</code>. It contains two sheets, <code>LONGLIST</code> and <code>SHORLIST</code>. The shortlist is structured as follows:</p>
 <table>
 <thead>
 <tr class="header">
@@ -488,51 +488,62 @@ experts_ss &lt;- map_dfr(unique(experts_ss$sheet_title),
                       function(x) experts_ss %&gt;% 
                         filter(sheet_title == x) %&gt;%
                         filter(updated == max(updated)))
+# vector experts present in Google Drive and ordered as such
+experts_from_gssheets &lt;- unlist(
+  map(
+    experts_ss$sheet_title, ~ str_split(
+      ., pattern = &quot;ias_UKOT_vertebrates_&quot;)[[1]][2]
+))
+experts_from_gssheets &lt;- str_sub(experts_from_gssheets, 
+                                 end = -(str_length(&quot;.tsv&quot;)+1))
 experts_ss$sheet_title</code></pre>
-<pre><code>##  [1] &quot;ias_UKOT_vertebrates_Mark_Outerbridge.tsv&quot;              
+<pre><code>##  [1] &quot;ias_UKOT_vertebrates_Fred_Burton.tsv&quot;                   
 ##  [2] &quot;ias_UKOT_vertebrates_Bryan_Manco.tsv&quot;                   
-##  [3] &quot;ias_UKOT_vertebrates_Jason_Berry.tsv&quot;                   
+##  [3] &quot;ias_UKOT_vertebrates_Tim_Adriaens.tsv&quot;                  
 ##  [4] &quot;ias_UKOT_vertebrates_Latisha_Martin.tsv&quot;                
-##  [5] &quot;ias_UKOT_vertebrates_Elena_Tricarico.tsv&quot;               
-##  [6] &quot;ias_UKOT_vertebrates_Tim_Adriaens.tsv&quot;                  
-##  [7] &quot;ias_UKOT_vertebrates_Jane_Haakonsson_Sophie_O’Hehir.tsv&quot;
-##  [8] &quot;ias_UKOT_vertebrates_Rose-Smyth_Christine.tsv&quot;          
-##  [9] &quot;ias_UKOT_vertebrates_Fred_Burton.tsv&quot;                   
+##  [5] &quot;ias_UKOT_vertebrates_Mark_Outerbridge.tsv&quot;              
+##  [6] &quot;ias_UKOT_vertebrates_Jason_Berry.tsv&quot;                   
+##  [7] &quot;ias_UKOT_vertebrates_Elena_Tricarico.tsv&quot;               
+##  [8] &quot;ias_UKOT_vertebrates_Jane_Haakonsson_Sophie_O’Hehir.tsv&quot;
+##  [9] &quot;ias_UKOT_vertebrates_Rose-Smyth_Christine.tsv&quot;          
 ## [10] &quot;ias_UKOT_vertebrates_Nancy_Pascoe.tsv&quot;                  
 ## [11] &quot;ias_UKOT_vertebrates_Ian_Winfield.tsv&quot;</code></pre>
 <p>We import the experts’ shortlists by these spreadsheets:</p>
 <pre class="r"><code>title_ssheets &lt;- map(experts_ss$sheet_title, ~ gs_title(.))
 dfs_experts &lt;- map(
   title_ssheets, ~ gs_read(ss = ., ws = &quot;SHORTLIST&quot;)
-)
-names(dfs_experts) &lt;- experts_ss %&gt;% pull(sheet_title)</code></pre>
-<p>First, we save the most updated version of the shortlists in the directory <code>./data/raw/</code>:</p>
+)</code></pre>
+<p>We provide names to this list of dataframes. We name them by expert name:</p>
+<pre class="r"><code>names(dfs_experts) &lt;- experts_from_gssheets</code></pre>
+<p>We save the shortlists in the directory <code>./data/raw/</code>:</p>
 <pre class="r"><code>map(names(dfs_experts), ~ write_tsv(dfs_experts[[.]], 
-                                    path = paste0(&quot;../data/raw/&quot;, .)))</code></pre>
+                                    path = paste0(&quot;../data/raw/ias_UKOT_vertebrates_&quot;, ., &quot;.tsv&quot;)))</code></pre>
 <p>An example from the shortlist of one expert:</p>
-<pre class="r"><code>dfs_experts[[4]]</code></pre>
-<pre><code>## # A tibble: 11 x 3
-##    species                   UKOTs `remarks (optional)`
-##    &lt;chr&gt;                     &lt;chr&gt; &lt;lgl&gt;               
-##  1 Canis familiaris          VG    NA                  
-##  2 Iguana iguana             VG    NA                  
-##  3 Belonesox belizanus       VG    NA                  
-##  4 Molothrus bonariensis     VG    NA                  
-##  5 Chiloscyllium punctatum   VG    NA                  
-##  6 Platax orbicularis        VG    NA                  
-##  7 Boa constrictor imperator VG    NA                  
-##  8 Caiman crocodilus         VG    NA                  
-##  9 Python molurus bivittatus VG    NA                  
-## 10 Ramphotyphlops braminus   VG    NA                  
-## 11 Eleutherodactylus cocqui  VG    NA</code></pre>
+<pre class="r"><code>dfs_experts$Tim_Adriaens</code></pre>
+<pre><code>## # A tibble: 32 x 3
+##    species                   UKOTs                  `remarks (optional)`
+##    &lt;chr&gt;                     &lt;chr&gt;                  &lt;chr&gt;               
+##  1 Acridotheres cristatellus AI, BM, KY, MS, TC, VG &lt;NA&gt;                
+##  2 Acridotheres tristis      AI, BM, KY, MS, TC, VG &lt;NA&gt;                
+##  3 Anolis carolinensis       AI, BM, MS, TC, VG     &lt;NA&gt;                
+##  4 Anolis equestris          AI, BM, MS, TC, VG     &lt;NA&gt;                
+##  5 Anolis grahami            AI, KY, MS, TC, VG     &lt;NA&gt;                
+##  6 Anolis sagrei             AI, BM, MS             &lt;NA&gt;                
+##  7 Aratinga erythrogenys     AI, BM, MS, TC, VG     &lt;NA&gt;                
+##  8 Boiga irregularis         AI, BM, KY, MS, TC, VG &lt;NA&gt;                
+##  9 Canis familiaris          AI, BM, MS, TC, VG     &lt;NA&gt;                
+## 10 Capra hircus              AI, BM, KY, MS, TC     &lt;NA&gt;                
+## # ... with 22 more rows</code></pre>
 <p>Tidy the dataframes (one row per species per country):</p>
-<pre class="r"><code>dfs_experts &lt;- map(dfs_experts, function(x) x %&gt;%
+<pre class="r"><code># remove any whitespace experts could ever have introduced
+dfs_experts &lt;- map(dfs_experts, function(x) x %&gt;%
                      mutate(UKOTs = str_replace_all(UKOTs, 
                                                 pattern = &quot; &quot;,
                                                 replace = &quot;&quot;)))
 dfs_experts &lt;- map(dfs_experts, 
                    function(x) x %&lt;&gt;% 
                      separate_rows(UKOTs, sep = &quot;,&quot;))
+# add name experts
 dfs_experts &lt;- map(names(dfs_experts),
                    function(x) dfs_experts[[x]] %&lt;&gt;%
                      mutate(expert = x))</code></pre>
@@ -540,50 +551,85 @@ dfs_experts &lt;- map(names(dfs_experts),
 <pre class="r"><code>combined_dfs &lt;- bind_rows(dfs_experts)
 combined_counts_species &lt;- combined_dfs %&gt;% group_by(species, 
                                                      UKOTs) %&gt;%
-  count() %&gt;%
-  ungroup() %&gt;% 
-  distinct()
-
-# combined_counts_species %&lt;&gt;% 
-#   rowwise() %&gt;%
-#   mutate(remarks = paste((combined_dfs %&gt;% 
-#            filter(species  == .$species) %&gt;% 
-#            select(`remarks (optional)`) %&gt;% 
-#              filter(!is.na(`remarks (optional)`)) %&gt;% 
-#              distinct() %&gt;% pull()), 
-#            collapse = &quot;;&quot;)) %&gt;% 
-#   ungroup() %&gt;%
-#   distinct()</code></pre>
+  summarize(n = n(), 
+            experts = toString(na.omit(expert)),
+            remarks = toString(na.omit(`remarks (optional)`))) %&gt;%
+  ungroup() %&gt;%
+  filter(!species == &quot;Dummy Dummy&quot;) %&gt;%
+  distinct() %&gt;%
+  mutate(experts = str_replace_all(experts, 
+                                   pattern = &quot; &quot;,
+                                   replace = &quot;&quot;))</code></pre>
+<p>Notice that we <em>summarized</em> preserving the names of the experts. It will be a very useful information in order to discuss scoring among experts. First, we have to check the consistency between the merged shorlist and longlist. It can happen that an expert mistypes a species name or adds a species in his shortlist without first adding it in the longlist.</p>
+<pre class="r"><code>source('./check_completeness_longlist.R')
+check_completeness_longlist(
+  longlist_filename = &quot;ias_UKOT_vertebrates_invertebrates.tsv&quot;, 
+  merged_species_df = combined_counts_species, 
+  ws_longlist = &quot;longlist&quot;, 
+  row_number_longlist = 1,
+  col_name_species_longlist = &quot;species&quot;)</code></pre>
+<pre><code>## # A tibble: 41 x 2
+##    species                   experts                                    
+##    &lt;chr&gt;                     &lt;chr&gt;                                      
+##  1 Acridotheres cristatellus Tim_Adriaens,Jane_Haakonsson_Sophie_O’Hehir
+##  2 Acridotheres tristis      Tim_Adriaens,Jane_Haakonsson_Sophie_O’Hehir
+##  3 Amazona sp.               Bryan_Manco                                
+##  4 Aratinga solstitialis     Jane_Haakonsson_Sophie_O’Hehir             
+##  5 Atelerix albiventris      Bryan_Manco                                
+##  6 Atelerix algirus          Bryan_Manco                                
+##  7 Atelerix hybrid           Bryan_Manco                                
+##  8 Boiga irregularis         Tim_Adriaens                               
+##  9 Chiloscyllium punctatum   Latisha_Martin                             
+## 10 Chrysemys picta           Tim_Adriaens                               
+## # ... with 31 more rows</code></pre>
+<p>Species in column <code>species</code> have to be checked and in case added to longlist. Again, the column <code>experts</code> can help in case some doubts arise.</p>
 <p>Which species are present in the combined shorlist?</p>
-<pre class="r"><code>general_species_list &lt;- combined_counts_species %&gt;% 
+<pre class="r"><code>species_list &lt;- combined_counts_species %&gt;%
   arrange(desc(n)) %&gt;%
-  filter(!species == &quot;Dummy Dummy&quot;)</code></pre>
-<p>To a better overview, let’s spread by UKOTs:</p>
-<pre class="r"><code>general_species_list_spread &lt;- spread(general_species_list, key = UKOTs, value = n)
-general_species_list_spread</code></pre>
-<pre><code>## # A tibble: 85 x 7
-##    species                      AI    BM    KY    MS    TC    VG
-##    &lt;chr&gt;                     &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
-##  1 Acridotheres cristatellus     2     2     2     2     2     2
-##  2 Acridotheres tristis          2     2     2     2     2     2
-##  3 Amazona auropalliata          1     1     1     1     1     1
-##  4 Amazona ochrocephala          2     2    NA     2     2     2
-##  5 Anas platyrhynchos            1    NA    NA     1     1     1
-##  6 Anolis carolinensis           2     3     1     3     3     3
-##  7 Anolis equestris              3     3     1     3     3     3
-##  8 Anolis grahami                2    NA     2     2     2     2
-##  9 Anolis sagrei                 2     2    NA     2    NA    NA
-## 10 Aratinga erythrogenys         3     3    NA     3     3     3
-## # ... with 75 more rows</code></pre>
+  distinct(species)
+species_list</code></pre>
+<pre><code>## # A tibble: 100 x 1
+##    species                
+##    &lt;chr&gt;                  
+##  1 Capra hircus           
+##  2 Myiopsitta monachus    
+##  3 Herpestes auropunctatus
+##  4 Iguana iguana          
+##  5 Molothrus bonariensis  
+##  6 Procyon lotor          
+##  7 Anolis carolinensis    
+##  8 Anolis equestris       
+##  9 Aratinga erythrogenys  
+## 10 Canis familiaris       
+## # ... with 90 more rows</code></pre>
+<p>To a better overview, let’s spread such list by UKOTs:</p>
+<pre class="r"><code>merged_species_list_spread &lt;- spread(combined_counts_species, 
+                                     key = UKOTs,
+                                     value = n)
+merged_species_list_spread</code></pre>
+<pre><code>## # A tibble: 135 x 9
+##    species    experts      remarks        AI    BM    KY    MS    TC    VG
+##    &lt;chr&gt;      &lt;chr&gt;        &lt;chr&gt;       &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;
+##  1 Acridothe~ Tim_Adriaen~ &quot;&quot;              2     2     2     2     2     2
+##  2 Acridothe~ Tim_Adriaen~ interislan~     2     2     2     2     2     2
+##  3 Amazona a~ Fred_Burton~ &quot;&quot;              2     2     2     2     2     2
+##  4 Amazona o~ Fred_Burton~ Hybridizat~     2     2    NA     2     2     2
+##  5 Amazona s~ Bryan_Manco  &quot;&quot;             NA    NA    NA    NA     1    NA
+##  6 Anas plat~ Fred_Burton  &quot;&quot;              1    NA    NA     1     1     1
+##  7 Anolis ca~ Elena_Trica~ &quot;&quot;             NA    NA     1    NA    NA    NA
+##  8 Anolis ca~ Fred_Burton~ moderate i~     2    NA    NA    NA    NA    NA
+##  9 Anolis ca~ Fred_Burton~ moderate i~    NA     3    NA     3     3     3
+## 10 Anolis eq~ Fred_Burton~ high impac~     3     3    NA     3     3     3
+## # ... with 125 more rows</code></pre>
 <p>And save it:</p>
-<pre class="r"><code>write_tsv(general_species_list_spread, path = &quot;../data/output/general_species_list_spread.tsv&quot;)</code></pre>
+<pre class="r"><code>write_tsv(merged_species_list_spread, path = &quot;../data/output/merged_species_list_spread.tsv&quot;)</code></pre>
 <p>It could be also important to have an overview of species combined with the number of experts who judge them present in the horizon. In case the same species has different number of assessors for different UKOTs, take the maximum.</p>
-<pre class="r"><code>overview_species &lt;- general_species_list %&gt;% 
+<pre class="r"><code>overview_species &lt;- combined_counts_species %&gt;% 
   group_by(species) %&gt;% 
   summarize(n_experts = max(n)) %&gt;%
   arrange(desc(n_experts))
 overview_species</code></pre>
-<pre><code>## # A tibble: 85 x 2
+<pre><code>## # A tibble: 100 x 2
 ##    species                 n_experts
 ##    &lt;chr&gt;                       &lt;dbl&gt;
 ##  1 Capra hircus                   5.
@@ -596,46 +642,48 @@ overview_species</code></pre>
 ##  8 Anolis equestris               3.
 ##  9 Aratinga erythrogenys          3.
 ## 10 Canis familiaris               3.
-## # ... with 75 more rows</code></pre>
+## # ... with 90 more rows</code></pre>
 <p>Let’s save it in <code>../data/output/first_round_as_UKOTs.tsv</code>:</p>
 <pre class="r"><code>write_tsv(overview_species,
-          path = &quot;../data/output/first_round_as_UKOTs.tsv&quot;)</code></pre>
+          path = &quot;../data/output/overview_species_number_experts.tsv&quot;)</code></pre>
 </div>
 <div id="focus-on-shortlists" class="section level1">
 <h1>Focus on shortlists</h1>
 <p>Experts should now start to set scores for species in the combined shortlist. In order to help them in doing it, we provide them a selection of the unified checklist with GBIF number of occurrences based on the species in the combined shorlist.</p>
-<p>First we have to get the cleaned and complete longlist which has been saved as a googlesheet as explained in <code>workflow_retrieve_GBIF_checklist_dplyr.Rmd</code>:</p>
-<pre class="r"><code>my_sheets &lt;- gs_ls()
+<p>First we have to get the most updated version of the longlist which has been saved as a googlesheet <code>workflow_retrieve_GBIF_checklist_dplyr.Rmd</code>:</p>
+<pre class="r"><code>longlist_ssheet &lt;- &quot;ias_UKOT_vertebrates_invertebrates&quot;
+my_sheets &lt;- gs_ls()
 google_ssheet &lt;- my_sheets %&gt;% 
   filter(str_detect(my_sheets$sheet_title, 
-                    pattern = &quot;ias_UKOT_vertebrates_invertebrates&quot;))
+                    pattern = longlist_ssheet))
 google_ssheet %&lt;&gt;%
   filter(updated == max(google_ssheet$updated)) # take the most recent version
-unified_checklist_vert &lt;- gs_key(google_ssheet$sheet_key) %&gt;% gs_read(ws = &quot;LONGLIST&quot;)</code></pre>
+longlist_vert &lt;- gs_key(google_ssheet$sheet_key) %&gt;% 
+  gs_read(ws = &quot;longlist&quot;)</code></pre>
 <p>We select the species which are in the shortlists:</p>
-<pre class="r"><code>combined_shortlist_occ &lt;- unified_checklist_vert %&gt;%
-  filter(Species %in% general_species_list$species)
+<pre class="r"><code>combined_shortlist_occ &lt;- longlist_vert %&gt;%
+  filter(species %in% overview_species$species)
 combined_shortlist_occ</code></pre>
-<pre><code>## # A tibble: 58 x 17
-##    Species        AI    BM    KY    MS    TC    VG organism_type  synonyms
+<pre><code>## # A tibble: 59 x 17
+##    species        AI    BM    KY    MS    TC    VG organism_type  synonyms
 ##    &lt;chr&gt;       &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt;          &lt;chr&gt;   
 ##  1 Amazona oc~    NA    NA    41    NA    NA    NA Vertebrate - ~ &lt;NA&gt;    
-##  2 Anas platy~    NA  1857    NA    NA    NA    NA Vertebrate - ~ &lt;NA&gt;    
-##  3 Anolis car~     2     1     1    NA     1    NA Vertebrate - ~ &lt;NA&gt;    
-##  4 Anolis equ~    NA    NA    NA    NA    NA    NA Vertebrate - ~ &lt;NA&gt;    
-##  5 Anolis gra~    NA   608    17    NA    NA    NA vertebrate - ~ &lt;NA&gt;    
-##  6 Anolis sag~     2    NA   362    NA     6     8 Vertebrate - ~ &lt;NA&gt;    
-##  7 Aratinga e~    NA    NA    NA    NA    NA    NA Vertebrate - ~ &lt;NA&gt;    
-##  8 Aratinga p~    NA    NA    NA    NA    NA     3 Vertebrate - ~ &lt;NA&gt;    
-##  9 Boa constr~    NA    NA    NA    NA    NA    NA Vertebrate - ~ &lt;NA&gt;    
-## 10 Bos taurus     NA    NA    NA    NA    NA     1 &quot;Vertebrate -~ &lt;NA&gt;    
-## # ... with 48 more rows, and 8 more variables: common_names &lt;chr&gt;,
+##  2 Amazona au~    NA    NA    NA    NA    NA    NA Vertebrate - ~ &lt;NA&gt;    
+##  3 Anas platy~    NA  1857    NA    NA    NA    NA Vertebrate - ~ &lt;NA&gt;    
+##  4 Anolis car~     2     1     1    NA     1    NA Vertebrate - ~ &lt;NA&gt;    
+##  5 Anolis equ~    NA    NA    NA    NA    NA    NA Vertebrate - ~ &lt;NA&gt;    
+##  6 Anolis gra~    NA   608    17    NA    NA    NA vertebrate - ~ &lt;NA&gt;    
+##  7 Anolis sag~     2    NA   362    NA     6     8 Vertebrate - ~ &lt;NA&gt;    
+##  8 Aratinga e~    NA    NA    NA    NA    NA    NA Vertebrate - ~ &lt;NA&gt;    
+##  9 Aratinga p~    NA    NA    NA    NA    NA     3 Vertebrate - ~ &lt;NA&gt;    
+## 10 Boa constr~    NA    NA    NA    NA    NA    NA Vertebrate - ~ &lt;NA&gt;    
+## # ... with 49 more rows, and 8 more variables: common_names &lt;chr&gt;,
 ## #   broad_habitat &lt;chr&gt;, exotic_in &lt;chr&gt;, invasive_in &lt;chr&gt;,
 ## #   main_reference &lt;chr&gt;, checklist &lt;chr&gt;, origin &lt;chr&gt;, phylum &lt;chr&gt;</code></pre>
 <p>We save it as an output in order to share it with experts for starting scoring:</p>
 <pre class="r"><code>write_tsv(
   combined_shortlist_occ, 
-  path = &quot;../data/filter_combined_shortlist_from_unified_checklist.tsv&quot;)</code></pre>
+  path = &quot;../data/output/filter_combined_shortlist_from_unified_checklist.tsv&quot;)</code></pre>
 </div>
 
 
