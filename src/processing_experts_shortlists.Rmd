@@ -38,16 +38,15 @@ library(magrittr)
 
 # Import spreadsheets
 
-The experts receive a spreadsheet with a *longlist* of alien or possible future aliens. The experts can take into account species out this longlist as well. They are invited to select around 10 species individually. This judge independency is achieved by making individual spreadsheets which are not globally shared with all experts community. This strategy is at the moment experimented within vertebrates group. 
+The experts receive a spreadsheet with a *longlist* of alien or possible future aliens. The experts are invited to review it by adding additional species on it. In the column `checklist` they should write `expert check`. Each of them is  invited to select around 10-20 species. Individual spreadsheets are made which are not globally shared with all experts community. At the moment this strategy is being tested within the vertebrates group.
 
-The Google spreadsheets are called `ias_UKOT_vertebrates_firstname_surname.tsv` and contain two sheets, `LONGLIST` and `SHORLIST`. 
-The shortlist is structured as follows:
+The Google spreadsheets are called  in the following way: `ias_UKOT_vertebrates_firstname_surname.tsv`. It contains two sheets, `LONGLIST` and `SHORLIST`. The shortlist is structured as follows:
 
 |species|country|remarks (optional)|
 | --- | --- | --- |
-|example1|KY, AI, BM|remark1|
-|example2|AI, BM, MS, TC, VG, KY|remark2|
-|example3|TC|...|
+|   example1   |   KY, AI, BM   |   remark1   |
+|   example2   |   AI, BM, MS, TC, VG, KY|   remark2   |
+|   example3   |   TC   |   ...   |
 |    |    |    |
 
 The columns `species` and  `country` are mandatory while `remarks` is optional.
@@ -75,6 +74,14 @@ experts_ss <- map_dfr(unique(experts_ss$sheet_title),
                       function(x) experts_ss %>% 
                         filter(sheet_title == x) %>%
                         filter(updated == max(updated)))
+# vector experts present in Google Drive and ordered as such
+experts_from_gssheets <- unlist(
+  map(
+    experts_ss$sheet_title, ~ str_split(
+      ., pattern = "ias_UKOT_vertebrates_")[[1]][2]
+))
+experts_from_gssheets <- str_sub(experts_from_gssheets, 
+                                 end = -(str_length(".tsv")+1))
 experts_ss$sheet_title
 ```
 
@@ -85,26 +92,33 @@ title_ssheets <- map(experts_ss$sheet_title, ~ gs_title(.))
 dfs_experts <- map(
   title_ssheets, ~ gs_read(ss = ., ws = "SHORTLIST")
 )
-names(dfs_experts) <- experts_ss %>% pull(sheet_title)
 ```
 
-First, we save the most updated version of the shortlists in the directory `./data/raw/`:
+We provide names to this list of dataframes. We name them by expert name:
+
+```{r name_by_expert}
+names(dfs_experts) <- experts_from_gssheets
+```
+
+
+We save the shortlists in the directory `./data/raw/`:
 
 ```{r save_raw_shortlists, results = "hide"}
 map(names(dfs_experts), ~ write_tsv(dfs_experts[[.]], 
-                                    path = paste0("../data/raw/", .)))
+                                    path = paste0("../data/raw/ias_UKOT_vertebrates_", ., ".tsv")))
 ```
 
 An example from the shortlist of one expert:
 
 ```{r explore}
-dfs_experts[[4]]
+dfs_experts$Tim_Adriaens
 ```
 
 
 Tidy the dataframes (one row per species per country):
 
 ```{r tidy_dfs}
+# remove any whitespace experts could ever have introduced
 dfs_experts <- map(dfs_experts, function(x) x %>%
                      mutate(UKOTs = str_replace_all(UKOTs, 
                                                 pattern = " ",
@@ -112,6 +126,7 @@ dfs_experts <- map(dfs_experts, function(x) x %>%
 dfs_experts <- map(dfs_experts, 
                    function(x) x %<>% 
                      separate_rows(UKOTs, sep = ","))
+# add name experts
 dfs_experts <- map(names(dfs_experts),
                    function(x) dfs_experts[[x]] %<>%
                      mutate(expert = x))
@@ -123,48 +138,59 @@ We can now combine the information provided by all experts:
 combined_dfs <- bind_rows(dfs_experts)
 combined_counts_species <- combined_dfs %>% group_by(species, 
                                                      UKOTs) %>%
-  count() %>%
-  ungroup() %>% 
-  distinct()
-
-# combined_counts_species %<>% 
-#   rowwise() %>%
-#   mutate(remarks = paste((combined_dfs %>% 
-#            filter(species  == .$species) %>% 
-#            select(`remarks (optional)`) %>% 
-#              filter(!is.na(`remarks (optional)`)) %>% 
-#              distinct() %>% pull()), 
-#            collapse = ";")) %>% 
-#   ungroup() %>%
-#   distinct()
+  summarize(n = n(), 
+            experts = toString(na.omit(expert)),
+            remarks = toString(na.omit(`remarks (optional)`))) %>%
+  ungroup() %>%
+  filter(!species == "Dummy Dummy") %>%
+  distinct() %>%
+  mutate(experts = str_replace_all(experts, 
+                                   pattern = " ",
+                                   replace = ""))
 ```
+
+Notice that we *summarized* preserving the names of the experts. It will be a very useful information in order to discuss scoring among experts. First, we have to check the consistency between the merged shorlist and longlist. It can happen that an expert mistypes a species name or adds a species in his shortlist without first adding it in the longlist.
+
+```{r check_consistency_merged_shortlist_longlist}
+source('./check_completeness_longlist.R')
+check_completeness_longlist(
+  longlist_filename = "ias_UKOT_vertebrates_invertebrates.tsv", 
+  merged_species_df = combined_counts_species, 
+  ws_longlist = "longlist", 
+  row_number_longlist = 1,
+  col_name_species_longlist = "species")
+```
+
+Species in column `species` have to be checked and in case added to longlist. Again, the column `experts` can help in case some doubts arise.
 
 Which species are present in the combined shorlist?
 
 ```{r general_species_list}
-general_species_list <- combined_counts_species %>% 
+species_list <- combined_counts_species %>%
   arrange(desc(n)) %>%
-  filter(!species == "Dummy Dummy")
+  distinct(species)
+species_list
 ```
 
-To a better overview, let's spread by UKOTs:
+To a better overview, let's spread such list by UKOTs:
 
 ```{r spread_table}
-general_species_list_spread <- spread(general_species_list, key = UKOTs, value = n)
-general_species_list_spread
+merged_species_list_spread <- spread(combined_counts_species, 
+                                     key = UKOTs,
+                                     value = n)
+merged_species_list_spread
 ```
 
 And save it:
 
 ```{r save_spread_table}
-write_tsv(general_species_list_spread, path = "../data/output/general_species_list_spread.tsv")
+write_tsv(merged_species_list_spread, path = "../data/output/merged_species_list_spread.tsv")
 ```
-
 
 It could be also important to have an overview of species combined with the number of experts who judge them present in the horizon. In case the same species has different number of assessors for different UKOTs, take the maximum.
 
 ```{r species_number_experts}
-overview_species <- general_species_list %>% 
+overview_species <- combined_counts_species %>% 
   group_by(species) %>% 
   summarize(n_experts = max(n)) %>%
   arrange(desc(n_experts))
@@ -175,30 +201,32 @@ Let's save it in `../data/output/first_round_as_UKOTs.tsv`:
 
 ```{r write_general_species_list}
 write_tsv(overview_species,
-          path = "../data/output/first_round_as_UKOTs.tsv")
+          path = "../data/output/overview_species_number_experts.tsv")
 ```
 
 # Focus on shortlists
 
 Experts should now start to set scores for species in the combined shortlist. In order to help them in doing it, we provide them a selection of the unified checklist with GBIF number of occurrences based on the species in the combined shorlist. 
 
-First we have to get the cleaned and complete longlist which has been saved as a googlesheet as explained in `workflow_retrieve_GBIF_checklist_dplyr.Rmd`:
+First we have to get the most updated version of the longlist which has been saved as a googlesheet `workflow_retrieve_GBIF_checklist_dplyr.Rmd`:
 
 ```{r get_most_udpated_longlist, results = "hide"}
+longlist_ssheet <- "ias_UKOT_vertebrates_invertebrates"
 my_sheets <- gs_ls()
 google_ssheet <- my_sheets %>% 
   filter(str_detect(my_sheets$sheet_title, 
-                    pattern = "ias_UKOT_vertebrates_invertebrates"))
+                    pattern = longlist_ssheet))
 google_ssheet %<>%
   filter(updated == max(google_ssheet$updated)) # take the most recent version
-unified_checklist_vert <- gs_key(google_ssheet$sheet_key) %>% gs_read(ws = "LONGLIST")
+longlist_vert <- gs_key(google_ssheet$sheet_key) %>% 
+  gs_read(ws = "longlist")
 ```
 
 We select the species which are in the shortlists:
 
 ```{r}
-combined_shortlist_occ <- unified_checklist_vert %>%
-  filter(Species %in% general_species_list$species)
+combined_shortlist_occ <- longlist_vert %>%
+  filter(species %in% overview_species$species)
 combined_shortlist_occ
 ```
 
@@ -207,6 +235,5 @@ We save it as an output in order to share it with experts for starting scoring:
 ```{r save_checklist_occ_filtered_by_shortlist}
 write_tsv(
   combined_shortlist_occ, 
-  path = "../data/filter_combined_shortlist_from_unified_checklist.tsv")
+  path = "../data/output/filter_combined_shortlist_from_unified_checklist.tsv")
 ```
-
