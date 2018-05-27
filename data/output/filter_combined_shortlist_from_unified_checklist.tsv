@@ -1,10 +1,11 @@
-Species	AI	BM	KY	MS	TC	VG	organism_type	synonyms	common_names	broad_habitat	exotic_in	invasive_in	main_reference	checklist	origin	phylum
+species	AI	BM	KY	MS	TC	VG	organism_type	synonyms	common_names	broad_habitat	exotic_in	invasive_in	main_reference	checklist	origin	phylum
 Amazona ochrocephala	NA	NA	41	NA	NA	NA	Vertebrate - Bird	NA	"yellow-crowned amazon parrot;yellow -crowned
 parrot;"	Terrestrial	Curacao;Trinidad?	NA	"Kairo, M., Ali, B. Cheesman, O., Haysom, K. and Murphy, S. 2003.
 Invasive species threats in the Caribbean Region. Report to The
 Nature Conservancy. 134 pp <http://tinyurl.com/awoxl or
 http://www.issg.org/database/species/reference_files/Kairo et al,
 2003.pdf>"	Caribbean_IAS_db	NA	NA
+Amazona auropalliata	NA	NA	NA	NA	NA	NA	Vertebrate - Bird	NA	NA	Terrestrial	NA	NA	NA	expert check	NA	NA
 Anas platyrhynchos	NA	1857	NA	NA	NA	NA	Vertebrate - Bird	NA	NA	terrestrial	Cayman Islands;Bermuda;	NA	"ISSG, 2011. Global Invasive Species Database (GISD). Invasive
 Species Specialist Group of the IUCN Species Survival Commission.
 http://www.issg.org/database"	Caribbean_IAS_db	NA	NA
@@ -83,7 +84,6 @@ Invasive species threats in the Caribbean Region. Report to The
 Nature Conservancy. 134 pp <http://tinyurl.com/awoxl or
 http://www.issg.org/database/species/reference_files/Kairo et al,
 2003.pdf>"	Caribbean_IAS_db, GRIIS	Alien	Chordata
-Cyclura nubila	NA	NA	101	NA	NA	NA	Vertebrate - Reptile	NA	Cuban iguana	terrestrial	NA	NA	NA	expert check	Alien	Chordata
 Dasyprocta punctata	NA	NA	5	NA	NA	NA	"Vertebrate -
 Mammal"	NA	Central American Agouti	terrestrial	NA	NA	NA	expert check	Alien	Chordata
 Eleutherodactylus cocqui	NA	NA	NA	NA	NA	NA	"Vertebrate -
@@ -280,10 +280,12 @@ Islands;Curacao;Do minica;Puerto Rico;US Virgin Islands;Montserrat;"	NA	Caribbea
 "Sylvilagus floridianus
 nigronuchalis"	NA	NA	NA	NA	NA	NA	"Vertebrate -
 Mammal"	NA	cottontail rabbit;	Terrestrial	Curacao;	NA	NA	Caribbean_IAS_db	NA	NA
-Tiaris olivacea	NA	NA	NA	NA	NA	NA	Vertebrate - Bird	NA	Ciguita de hierba (DR);Yellow-faced Grassquit	Terrestrial	Dominican Republic;	Dominican Republic	NA	Caribbean_IAS_db	NA	NA
 Tilapia zillii	NA	NA	NA	NA	NA	NA	Vertebrate - Fish	NA	NA	freshwater	Antigua-Barbuda;	NA	NA	Caribbean_IAS_db	NA	NA
+Xenopus laevis	NA	NA	NA	NA	NA	NA	"Vertebrate -
+Amphibian"	NA	African clawed frog;	Freshwater	NA	NA	NA	Caribbean_IAS_db	NA	NA
 Leiocephalus carinatus	NA	NA	255	NA	NA	NA	Vertebrate - Reptile	NA	northern curly-tailed lizard	Terrestrial	NA	NA	NA	expert check	NA	NA
 Pantherophis alleghaniensis	NA	NA	NA	NA	NA	NA	Vertebrate - Reptile	NA	eastern ratsnake	Terrestrial	NA	NA	NA	expert check	NA	NA
 Chamaeleo calyptratus	NA	NA	NA	NA	NA	NA	Vertebrate - Reptile	NA	veiled chameleon	Terrestrial	NA	NA	NA	expert check	NA	NA
 Varanus exanthematicus	NA	NA	NA	NA	NA	NA	Vertebrate - Reptile	NA	savannah monitor	Terrestrial	NA	NA	NA	expert check	NA	NA
 Pygocentrus nattereri	NA	NA	NA	NA	NA	NA	Vertebrate - Fish	NA	red-bellied piranha	Freshwater	NA	NA	NA	expert check	NA	NA
+Chlorocebus pygerythrus	NA	NA	NA	NA	NA	NA	Vertebrate - Mammal	NA	vervet monkey	Terrestrial	NA	NA	NA	expert check	NA	NA
