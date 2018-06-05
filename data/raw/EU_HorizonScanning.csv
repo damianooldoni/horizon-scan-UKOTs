@@ -1,0 +1,97 @@
+,,,,,,,,,,,,Impact mechanisms on species,,,,,,,,,Impact mechanisms on ecosystem function,,,
+List_id,Rank,Species,Subgroup,Common Name,Taxonomic Group,Functional Group,Pathway,Origin,Bioregions threatened,Already present in EU?,Overall Risk,Competition,Predation,Hybridization,Disease Transmission,Parasitism,Poisoning/Toxicity,Bio-fouling,Grazing/herbivory/browsing,Interactions with other IAS,Nutrient cycling,Physical modification of habitat,Natural succession,Disruption to food webs
+1,VERY HIGH,Alternanthera philoxeroides,Plants,Alligator-weed,Vascular plant,Primary prod,,SAm,"MAC, MED",Y,625,X,,,,,,,,,X,X,X,
+3,VERY HIGH,Pterois miles,Marine,"devil firefish, lion fish","Scorpaeniformes, Scorpaenidae",Pred,Nat,"WIP, TeSAf","MED, MAC, ATL",Y,562.5,X,X,,,,X,,X,,,,,
+4,VERY HIGH,Herpestes auropunctatus,Vertebrates,Small Asian mongoose,Mammals,Pred,"BC,Pet, Nat",Afr,"MED, CON",Y,562.5,X,X,,,,,,,X,,,,X
+6,VERY HIGH,Callosciurus finlaysonii,Vertebrates,Finlayson's squirrel,Mammals,Herb,"Nat, Pet, BZA",AT,"ATL, MED, CON",Y,562.5,X,X,,X,,,,X,X,,X,,X
+7,VERY HIGH,Lampropeltis getula,Vertebrates,Common Kingsnake,Reptiles,Pred,"Other, Pet, BZA",NAm,"MAC, MED",Y,506.25,X,X,,,,,,,,,,,X
+8,VERY HIGH,Limnoperna fortunei,Freshwater,Golden mussel,Bivalve mollusc,Filter,"Ballast, Ship, Ang, Container, Water, Nat",As,"MED, ATL, CON, STE",N,500,X,,,,,,X,X,X,X,X,,X
+9,VERY HIGH,Orconectes rusticus,Freshwater,Rusty crayfish,Crustacean,Omni,"F, Aq, Pet, Res, Live, Ship, Ballast, Water, Nat",NAm,"MED, ATL, CON, STE",N,500,X,X,,X,,,,X,X,X,X,,X
+11,VERY HIGH,Penaeus aztecus,Marine,northern brown shrimp,,Omni,,TeNWA,"MED, MAC",Y,500,,,,,,,,,,,,,
+13,VERY HIGH,Gambusia affinis,Freshwater,western mosquitofish,Fish,Omni,"BC, CNM",NAm,"MAC, MED, ATL, CON, STE",Y,475,X,X,,,,,,,,,,,X
+14,VERY HIGH,Plotosus lineatus,Marine,striped eel catfish,"Siluriformes, Plotosidae",Pred,Nat,"WIP, TeNWP, CIP, TeAu","MED, MAC",N,455.625,X,X,,,,X,,,,,,,
+15,VERY HIGH,Pycnonotus cafer,Vertebrates,Red-vented Bulbul,,Omni,"Pet, Other",As,"ATL, MED, CON",Y,450,,,,,,,,,,,,,
+16,VERY HIGH,Acridotheres tristis,Vertebrates,common myna,Birds,Omni,"Nat, Pet, BZA",As,"ATL, MED, CON, MAC",Y,450,X,X,,,,,,X,X,,,,X
+17,VERY HIGH,Bufo mauritanicus,Vertebrates,Berber toad,Amphibians,Pred,"Pet, Other",Afr,"MED, MAC",Y,450,X,X,?,,,,,,X,,,X,X
+18,VERY HIGH,Nasua nasua,Vertebrates,Coati,Mammals,Omni,"BZA, Orn, Pet",Sam,"ATL, MED, CON",Y,450,X,X,,X,,,,,X,,,,X
+19,VERY HIGH,Micropterus dolomieu,Freshwater,smallmouth bass,Fish,Pred,"F, Aq",NAm,"MAC, MED, ATL, CON, STE",Y,405,,X,,,,,,,,,,,X
+20,VERY HIGH,Homarus americanus,Marine,Am. Lobster,,Pred,"Other, Live",TeNWA,"ATL, MED, MAC",Y,405,X,X,X,X,,,,,X,,,,
+22,VERY HIGH,Codium parvulum,Marine,a green alga,"Bryopsidales, Codiaceae",Primary Prod,nat,WIP,"MED, MAC",N,400,X,,,,,,X,,X,X,X,,
+23,VERY HIGH,Channa argus,Freshwater,northern snakehead,Fish,Pred,"R, Pet",AT,"MAC, MED, ATL, CON, STE",N,383.3333333,X,X,,X,,,,,,,,,X
+24,VERY HIGH,Oreochromis mossambicus,Freshwater,Mossambique tilapia,Fish,Omni,"R, Pet, Aq",Afr,"MAC, MED",Y,363.3333333,X,,,,,,,X,,,,,X
+25,VERY HIGH,Botrylloides giganteum,Marine,tunicate,"Stolidibranchia, Styelidae",Filter,"Hull, Ballast",TrEA,"MED, MAC",Y,360,X,,,,,,X,,,X,X,,
+26,VERY HIGH,Oreochromis aureus,Freshwater,blue tilapia,Fish,Omni,"R, Pet, Aq",Afr,"MAC, MED",Y,321.6666667,X,X,X,,,,,,X,,,,X
+27,VERY HIGH,Arthurdendyus triangulatus,Terr_Inverts,New Zealand flatworm,Platyhelminthes:   Tricladida,Pred,"Org, THM",Aus,"ATL, CON?, BOR?",Y,300,X,X,,,,,,,,X,X,,X
+28,VERY HIGH,Oreochromis niloticus,Freshwater,Nile tilapia,Fish,Omni,"R, Pet, Aq",Afr,"MAC, MED",Y,288.3333333,X,X,,,,,,X,,,,,X
+29,VERY HIGH,Pomacea canaliculata,Freshwater,Golden apple snail,Gastropod mollusc,Herb,"R, Aq, Pet, Bait, Con Plant, THM, Ang, Container, Ship, Hull, Water, Nat",SAm,"MED, CON, STE",Y,240,X,X,,X,,,,X,X,X,,,X
+30,VERY HIGH,Pomacea maculata,Freshwater,Giant apple snail,Gastropod mollusc,Herb,"R, Ag, Aq, Pet, Live, Ang, Ship, Hull, Water",SAm,"MED, CON, STE",Y,240,X,X,,X,,,,X,X,X,,,X
+31,VERY HIGH,Crepidula onyx,Marine,Onyx slippersnail,"Littorinimorpha,Calyptraeidae",Filter,"Hull, Aq",TrEP,"ATL, MED, MAC",N,240,X,,,,,,X,,,X,X,,
+32,VERY HIGH,Mytilopsis sallei,Marine,black striped mussel,"Veneroidea, Dreissenidae",Filter,"Hull, Ballast",TrWA,"MED, MAC, ATL, BAL, BLK",N,216,X,,,,,,X,,,X,X,X,X
+33,HIGH,Gymnocoronis spilanthoides,Plants,Senegal tea,Asteraceae,Primary prod,Pet,"As, Sam","MAC, (MED)",N,625,X,,,,,,,,,X,X,X,
+34,HIGH,Lygodium japonicum,Plants,Japanese Climbing Fern,Vascular plant,Primary prod,"Hort, orn, BZA",AT,"MAC, (MED)",N,625,X,,,,,,,,,,X,X,
+35,HIGH,Andropogon virginicus,Plants,Broom-sedge,Poaceae,Primary prod,Mach,NAm,"ATL, CON, MAC, MED, STE",Y,500,X,,,,,,,,,X,X,,
+36,HIGH,Celastrus orbiculatus,Plants,Oriental Bittersweet,,Primary prod,Hort,As,"ATL, BOR, CON, (MED)",N,500,,,,,,,,,,,,,
+37,HIGH,Cortaderia jubata,Plants,,Poaceae,Primary prod,Hort,SAm,"ATL, MAC, MED",N,500,X,,,,,,,,,,X,X,
+38,HIGH,Euonymus fortunei,Plants,Winter Creeper,Vascular plant,Primary prod,Hort,As,"ATL, CON, MAC, MED",Y,500,X,,,,,,,,,X,X,,
+39,HIGH,Euonymus japonicus,Plants,Japanese spindle,Celastraceae,Primary prod,Hort,As,"ATL, CON, MAC, MED",Y,500,X,,,,,,,,,,X,,
+40,HIGH,Lespedeza juncea sericea (= L. cuneata),Plants,,Vascular plant,Primary prod,Hort,"As, Aus","ATL, CON, MAC, MED",N,500,X,,,,,X,,,,,X,,
+41,HIGH,Ligustrum sinense,Plants,Chinese Privet,Oleaceae,Primary prod,Hort,As,"ATL, MAC, MED",Y,500,X,,,,,,,,,X,X,,
+42,HIGH,Lonicera maackii,Plants,Amur Honeysuckle,Loniceraceae,Primary prod,"Orn, EC, L",As,"ATL, CON, MAC, MED",N,500,X,,,,,,,,,,X,,X
+43,HIGH,Lonicera morrowii,Plants,Morrow's Honeysuckle,Loniceraceae,Primary prod,"Orn, EC, L",As,"ATL, CON, MAC, MED",N,500,X,,,,,,,,,,X,,X
+44,HIGH,Microstegium vimineum,Plants,Nepalese Browntop,Vascular plant,Primary prod,"Seed, CNM",As,"(ATL), CON, MAC, MED",N,500,X,,,,,,,,,X,X,,X
+45,HIGH,Prosopis juliflora,Plants,Prosopis,Fabaceae,Primary prod,"For, Pr (biofuel)",Sam,"ATL, MAC, MED",N?,500,X,,,,,,,,X,X,X,X,
+46,HIGH,Prunus campanulata,Plants,Bell flower cherry,Rosaceae,Primary prod,Hort,As,"ATL, MAC",N,500,X,,,,,,,,,,X,,
+47,HIGH,Rubus rosifolius,Plants,Roseleaf Bramble,Rosacae,Primary prod,Hort,"AT, Aus",MAC,N,500,X,,X,,,,,,X,,X,X,X
+48,HIGH,Triadica sebifera (Sapium sebiferum),Plants,Chinese Tallowtree,Vascular plant,Primary prod,"Ag, hort",As,"MAC, MED",N,500,X,,,,,,,,,X,X,X,X
+49,HIGH,Acridotheres cristatellus,Vertebrates,Crested Myna,,Omni,"Pet, Other",As,"ATL, MED, CON, MAC",Y,405,,,,,,,,,,,,,
+50,HIGH,Cinnamomum camphora,Plants,Camphor Tree,Lauraceae,Primary prod,Hort,"As,AT","MAC, ATL",N?,400,X,,,,,X,,,,,X,,X
+51,HIGH,Clematis terniflora,Plants,Leather Leaf Clematis,Ranunculaceae,Primary prod,Hort,"As, AT","MAC, ATL",?,400,X,,,,,,,,,,X,,
+52,HIGH,Ehrharta calycina,Plants,Perennial Veldtgrass,Poaceae,Primary prod,"L, EC, Ag",Afr,"MAC, MED",Y,400,X,,,,,,,,,X,X,,
+53,HIGH,Wedelia trilobata (= Sphagneticola trilobata),Plants,Wedelia,Vascular plant,Primary prod,"Hort, EC, L",SAm,"MAC, (MED)",Y,400,X,,,,,,,,,,X,X,
+54,HIGH,Pycnonotus jocosus,Vertebrates,Red-whiskered Bulbul,,Omni,"Pet, Other",As,"ATL, MED, CON",Y,393.75,,,,,,,,,,,,,
+55,HIGH,Axis axis,Vertebrates,Indian spotted deer,Mammals,Herb,"BZA, Nat, Pet, H, L, Orn",Afr,"ATL, MED, CON",Y,393.75,X,X,X,X,,,,X,X,X,X,X,
+56,HIGH,Cynops pyrrhogaster,Vertebrates,Japanese fire-bellied salamander,Amphibians,Omni,"BZA, Pet",As,CON,N,354.375,X,X,?,X,,,,,,,,X,X
+57,HIGH,Chrysemys picta,Vertebrates,Painted turtle,Reptiles,Omni,"Other, Pet, BZA",NAm,"CON, MED",Y?,354.375,X,X,,X,,,,,,,,,X
+58,HIGH,Rhea americana,Vertebrates,greater rhea,,Omni,,,"CON, MED",Y,350,,,,,,,,,,,,,
+59,HIGH,Psittacula eupatria,Vertebrates,Alexandrine parakeet,Birds,Herb,"Nat, Pet, BZA",AT,"ATL, MED",Y,350,X,,,X,,,,X,X,,,,X
+60,HIGH,Bison bison,Vertebrates,European bison,,Herb,"H, Cons",NAm,CON,N,337.5,,,,,,,,,,,,,
+61,HIGH,Chromolaena odorata,Plants,,Vascular plant,Primary prod,"Soil, timb, wood, pp",Sam,"MAC, MED",N?,320,X,,,X,,,,,,,X,X,
+62,HIGH,Cryptostegia grandiflora,Plants,,Vascular plant,Primary prod,Hort,Sam,"MAC, ATL, MED",N?,320,X,,,,,X,X,,,,X,X,
+63,HIGH,Hemidactylus frenatus,Vertebrates,House gecko,,Pred,Pet Container,Aus,"ATL, MED, CON",N,320,,,,,,,,,,,,,
+64,HIGH,Trichosurus vulpecula,Vertebrates,Brushtail Possum,,Omni,Pet Orn,Aus,"ATL, MED, CON, MAC",N,303.75,,,,,,,,,,,,,
+65,HIGH,Albizia lebbeck,Plants,Indian Siris,Fabaceae,Primary prod,"Hort, For",AT,"MAC, ATL, MED",N,300,X,,,,,,,,,X,X,X,
+66,HIGH,Fundulus heteroclitus,Freshwater,mummichog,Fish,Omni,"R, Pet",NAm,"MAC, MED, ATL, CON, STE",Y,293.3333333,X,,,,,,,,,,,,
+67,HIGH,Eleutherodactylus planirostris,Vertebrates,greenhouse frog,,Pred,"Pet, Container",NAm,"MED, MAC",N,288,,,,,,,,,,,,,
+68,HIGH,Rhinella marina,Vertebrates,Cane toad,Amphibians,Omni,"Pet, Other, TT, THM, BC",SAm,"MED, MAC",N,280,X,X,,,,X,,,X,X,,,X
+69,HIGH,Boiga irregularis,Vertebrates,brown tree snake,Reptiles,Pred,"Pet, Other, BZA, Container, Ship, Air",,"MED, MAC",N,280,X,X,,,,X,,,X,,,,X
+70,HIGH,Misgurnus anguillicaudatus,Freshwater,Oriental weatherfish,Fish,Omni,"R, Pet",AT,"MAC, MED, ATL, CON, STE",Y,276.6666667,X,X,,,,,,X,,,,,X
+71,HIGH,Eleutherodactylus coqui,Vertebrates,common coquí,,Pred,,,"MED, MAC",N,252,,,,,,,,,,,,,
+72,HIGH,Cyprinella lutrensis,Freshwater,red shiner,Fish,Omni,"R, Pet",NAm,"MAC, MED, ATL, CON, STE",Y,227.3333333,X,X,X,X,,,,,,,,,X
+73,HIGH,Morone americana,Freshwater,white perch,Fish,Pred,Aq,NAm,"MAC, MED, ATL, CON, STE",N,221.3333333,,X,,X,,,,,,,,,X
+74,HIGH,Hypostomus plecostomus,Freshwater,suckermouth catfish,Fish,Herb,"R, Pet",Sam,"MAC, MED",Y,215,X,,,,,,,X,,X,X,,X
+75,HIGH,Pseudoneris anomala,Marine,a polychaete,,Omni,,"WIP, CIP","MED, MAC",Y,210,,,,,,,,,,,,,
+76,HIGH,Cherax destructor,Freshwater,Common yabby,Crustacean,Omni,"F, Aq, Live, BZA, Pet",Aus,"MED, ATL, CON, STE",Y,200,X,X,,X,,,,X,X,X,X,,X
+77,HIGH,Tilapia zillii,Freshwater,redbelly tilapia,Fish,Omni,"R, Pet, Aq",Afr,"MAC, MED",Y,195.3333333,X,X,,,,,,X,,,,,X
+78,HIGH,Acanthophora spicifera,Marine,a red alga,,Primary Prod,"Hull,Ballast",TrWA,"MED, MAC",N,192,,,,,,,,,,,,,
+79,HIGH,Charybdis japonica,Marine,Asian paddle crab,"Decapoda, Portunidae",Pred,"Hull, Ballast","TeNWP, CIP","MED, MAC, ATL",Y,192,X,X,,X,,,,X,,,,,X
+80,HIGH,Perna viridis,Marine,Asian Green mussel,"Mytiloida, Mytilidae",Filter,"Hull, Ballast",,"MED, MAC, ATL",N,192,X,,,,,X,X,,,X,X,,
+81,HIGH,Symplegma reptans,Marine,tunicate,"Stolidobranchia, Styelidae",Filter,"Hull, Ballast",,"MED, MAC, ATL, BLK",N,192,X,,,,,,X,,,X,X,,
+82,HIGH,Potamocorbula amurensis,Marine,Asian basket clam,"Myoida, Corbulidae",Filter,Ballast,TeNWP,"MED, MAC, ATL, BLK, BAL",N,180,X,X,,,,,,X,X,X,X,X,X
+83,HIGH,Macrorhynchia philippina,Marine,White stinger,,Susp,,"CIP, WIP","MED, MAC, ATL",Y,175,,,,,,,,,,,,,
+84,HIGH,Pachycondyla chinensis,Terr_Inverts,Asian Needle Ant,"Hymenoptera, Formicidae",Omni,THM,As,"MED, ATL, CON, STE, MAC",N,175,X,X,,,,,,,X,X,X,X,X
+85,HIGH,Solenopsis invicta,Terr_Inverts,Red Imported Fire Ant,"Hymenoptera, Formicidae",Omni,THM,SAm,"MAC, MED",N,160,X,X,,,,X,,X,X,X,X,X,X
+86,HIGH,Solenopsis geminata,Terr_Inverts,Tropical fire ant,"Hymenoptera, Formicidae",Omni,THM,NAm/SAm,"MAC, MED, ATL?, CON?, STE",N,160,X,X,,,,X,,,X,X,X,X,X
+87,HIGH,Pheidole megacephala,Terr_Inverts,Big-headed Ant,"Hymenoptera, Formicidae",Omni,THM,Afr,"MAC, MED",Y,157.7087402,X,X,,(x) indirectly - it promotes honeydew producing hemiptera which in turn often vector plant disease,,,,,X,X,X,X,X
+88,HIGH,Misgurnus mizolepis,Freshwater,Chinese weather loach,Fish,Omni,"R, Pet",AT,"MAC, MED, ATL, CON, STE",Y,153,X,X,X,,,,,,,X,,,X
+89,HIGH,Marissa cornuarietis,Freshwater,South American giant ramshorn snail,Gastropod mollusc,Omni,"BC, Aq, Pet, Con Plant, THM, Water, Nat, Pet, BZA",Sam,"MAC, MED, CON, STE",Y,135,X,X,,,,,,X,X,X,,X,X
+90,HIGH,Amynthas agrestis,Terr_Inverts,crazy snake worm,Annelida: Oligochaeta,Det,"Org, THM",As?,"ATL, CON",N,129,X,,,,,,,,X,X,X,X,X
+91,HIGH,Tetropium gracilicorne,Terr_Inverts,fine-horned spruce beetle,"Coleoptera, Cerambycidae",Herb,"TT,THM,CNM",As,"ATL, CON, STE, BOR",N,128,X,,,,,,,X,X,X,X,X,X
+92,HIGH,Solenopsis richteri,Terr_Inverts,Black Imported Fire Ant,"Hymenoptera, Formicidae",Omni,THM,SAm,"MAC, MED, ATL?, CON?, STE",N,128,X,X,,,,X,,X,X,X,X,X,X
+93,HIGH,Sirex ermak,Terr_Inverts,Blue-black Horntail,"Hymenoptera, Siricidae",Herb,"TT, For",As,"CON, STE, BOR",N,110.6191406,X,,,X,,,,X,,X,X,X,X
+94,HIGH,Gammarus fasciatus,Freshwater,Freshwater shrimp,Crustacean,Omni,"Live, Bait, THM, Ang, Container, Ship, Water, Ballast",NAm,"MED, ATL, CON, STE",N,108,X,X,,,,,,X,X,X,,X,X
+95,HIGH,Cherax quadricarinatus,Freshwater,Redclaw crayfish,Crustacean,Omni,"Aq, Pet, Water",Aus,"MED, ATL, CON, STE",Y,108,X,X,,X,,,,X,X,X,X,X,X
+96,HIGH,Saperda candida,Terr_Inverts,Round-headed Apple Tree Borer,"Coleoptera, Cerambycidae",Herb,"TT, CNM",NAm,"MAC?, MED, ATL, CON, STE, BOR",Y,105,X,,,,,,,X,X,X,X,X,X
+97,HIGH,Bellamya chinensis,Freshwater,Chinese mysterysnail,Gastropod mollusc,Filter,"R, Aq, Con Plant, Live, Ang, Ship, Water, Pet",As,"MED, ATL, CON, STE",Y,100,X,,,X,,,X,X,X,X,,,X
+98,HIGH,Ashworthius sidemi,Terr_Inverts,,"Nematoda, Trichostrongylidae",Pred,Par Anim,As,"CON, ATL?",Y,100,,,,Disease not vector,X,,,,,,,,
+99,HIGH,Aeolesthes sarta,Terr_Inverts,"City Longhorn Beetle, Qetta borer","Coleoptera, Cerambycidae",Herb,"Con Plant, TT, THM",As,"MED, ATL, CON, STE, BOR",N,99.1706543,X,,,,,,,X,X,X,X,X,X
+100,HIGH,Vespula pensylvanica,Terr_Inverts,western yellowjacket,"Hymenoptera, Vespidae",Omni,TT,NAm,"MAC?, MED, ATL, CON, STE, BOR?",N,99.12109375,X,X,,,,X,,,X,X,,,X

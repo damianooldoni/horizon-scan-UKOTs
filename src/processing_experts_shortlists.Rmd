@@ -21,6 +21,12 @@ knitr::opts_chunk$set(root.dir = "../",
                       message=FALSE)
 ```
 
+# General workframe
+
+The picture here below shows the general workflow. This pipeline will focus on the part contoured in red.
+
+![Process of expert shortlists](../figs/HORIZON SCAN Workflow_process_expert_shortlists.jpg "process expert shortlists")
+
 # Load libraries
 
 ```{r load_libraries}
@@ -36,18 +42,17 @@ library(purrr)
 library(magrittr)
 ```
 
-# Import spreadsheets
+# Import expert shortlists
 
-The experts receive a spreadsheet with a *longlist* of alien or possible future aliens. The experts are invited to review it by adding additional species on it. In the column `checklist` they should write `expert check`. Each of them is  invited to select around 10-20 species. Individual spreadsheets are made which are not globally shared with all experts community. At the moment this strategy is being tested within the vertebrates group.
+The experts receive a spreadsheet with a *longlist* of alien or possible future aliens. The experts are invited to review it by adding additional species on it. In the column `checklist` they should write `expert check`. They are also invited to select around 10-20 species, thus writing own shortlist of possible incoming alien species. Individual spreadsheets are made which are not globally shared with all experts community. At the moment this strategy is being tested within the vertebrates group.
 
-The Google spreadsheets are called  in the following way: `ias_UKOT_vertebrates_firstname_surname.tsv`. It contains two sheets, `LONGLIST` and `SHORLIST`. The shortlist is structured as follows:
+The Google spreadsheets are called in the following way: `ias_UKOT_vertebrates_firstname_surname.tsv`. It contains two sheets, `LONGLIST` and `SHORLIST`. The shortlist is structured as follows:
 
-|species|country|remarks (optional)|
-| --- | --- | --- |
-|   example1   |   KY, AI, BM   |   remark1   |
-|   example2   |   AI, BM, MS, TC, VG, KY|   remark2   |
-|   example3   |   TC   |   ...   |
-|    |    |    |
+| species   | country                 | remarks (optional)  |
+|-----------|-------------------------|---------------------|
+| example1  | KY, AI, BM              |     remark1         |
+| example2  | AI, BM, MS, TC, VG, KY  |     remark2         |
+| example3  | KY, AI, BM              |     ...             |
 
 The columns `species` and  `country` are mandatory while `remarks` is optional.
 Countries should be comma separated values as shown in the table above and should contain one or more of the 6 Caribbean UKOTs.
@@ -101,7 +106,7 @@ names(dfs_experts) <- experts_from_gssheets
 ```
 
 
-We save the shortlists in the directory `./data/raw/`:
+We save a copy of the shortlists locally as`.tsv` files in the directory `./data/raw/`:
 
 ```{r save_raw_shortlists, results = "hide"}
 map(names(dfs_experts), ~ write_tsv(dfs_experts[[.]], 
@@ -132,6 +137,9 @@ dfs_experts <- map(names(dfs_experts),
                      mutate(expert = x))
 ```
 
+
+# From shortlists to a combined list of species
+
 We can now combine the information provided by all experts:
 
 ```{r combine_dfs_experts}
@@ -149,11 +157,15 @@ combined_counts_species <- combined_dfs %>% group_by(species,
                                    replace = ""))
 ```
 
-Notice that we *summarized* preserving the names of the experts. It will be a very useful information in order to discuss scoring among experts. First, we have to check the consistency between the merged shorlist and longlist. It can happen that an expert mistypes a species name or adds a species in his shortlist without first adding it in the longlist.
+Notice that we *summarized* preserving the names of the experts. It will be a very useful information in order to discuss scoring among experts. 
+
+# Manage inconsistencies between merged list and longlist
+
+We have to check the consistency between the merged shorlist and longlist. It can be just a typo or it can be that an expert adds a species in his/her shortlist without first adding it in the longlist, everything is possible with humans!
 
 ```{r check_consistency_merged_shortlist_longlist}
 source('./check_completeness_longlist.R')
-check_completeness_longlist(
+unconsistencies <- check_completeness_longlist(
   longlist_filename = "ias_UKOT_vertebrates_invertebrates.tsv", 
   merged_species_df = combined_counts_species, 
   ws_longlist = "longlist", 
@@ -161,9 +173,20 @@ check_completeness_longlist(
   col_name_species_longlist = "species")
 ```
 
-Species in column `species` have to be checked and in case added to longlist. Again, the column `experts` can help in case some doubts arise.
+We save this list:
 
-Which species are present in the combined shorlist?
+```{r check_unconsistencies}
+write_tsv(unconsistencies,
+          path = "../data/interim/unconsistencies_shortlists_vs_longlist.tsv")
+```
+
+Again, the column `experts` can help in case some doubts arise. In case of typos or synonyms, these species should be removed or modified in order to maintain consistency between longlist and (merged) shortlist, otherwise they should be added to the longlist.
+
+# The combined shorlist: an overview
+
+Based on this combined shortlist, the experts could start scoring process. However, it could be helpful to provide an exploratory overview to the team leader. 
+
+Which (unique) species are present in the combined shorlist?
 
 ```{r general_species_list}
 species_list <- combined_counts_species %>%
@@ -202,38 +225,4 @@ Let's save it in `../data/output/first_round_as_UKOTs.tsv`:
 ```{r write_general_species_list}
 write_tsv(overview_species,
           path = "../data/output/overview_species_number_experts.tsv")
-```
-
-# Focus on shortlists
-
-Experts should now start to set scores for species in the combined shortlist. In order to help them in doing it, we provide them a selection of the unified checklist with GBIF number of occurrences based on the species in the combined shorlist. 
-
-First we have to get the most updated version of the longlist which has been saved as a googlesheet `workflow_retrieve_GBIF_checklist_dplyr.Rmd`:
-
-```{r get_most_udpated_longlist, results = "hide"}
-longlist_ssheet <- "ias_UKOT_vertebrates_invertebrates"
-my_sheets <- gs_ls()
-google_ssheet <- my_sheets %>% 
-  filter(str_detect(my_sheets$sheet_title, 
-                    pattern = longlist_ssheet))
-google_ssheet %<>%
-  filter(updated == max(google_ssheet$updated)) # take the most recent version
-longlist_vert <- gs_key(google_ssheet$sheet_key) %>% 
-  gs_read(ws = "longlist")
-```
-
-We select the species which are in the shortlists:
-
-```{r}
-combined_shortlist_occ <- longlist_vert %>%
-  filter(species %in% overview_species$species)
-combined_shortlist_occ
-```
-
-We save it as an output in order to share it with experts for starting scoring:
-
-```{r save_checklist_occ_filtered_by_shortlist}
-write_tsv(
-  combined_shortlist_occ, 
-  path = "../data/output/filter_combined_shortlist_from_unified_checklist.tsv")
 ```
