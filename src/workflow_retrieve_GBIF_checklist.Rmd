@@ -1,0 +1,391 @@
+---
+title: "Building a Caribbean IAS checklist of chordata"
+author: 
+- Damiano Oldoni
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    number_sections: true
+    theme: yeti
+    df_print: paged
+knit: (function(input_file, encoding) { rmarkdown::render(input_file, encoding = encoding, output_file = paste0("../docs/",sub(".Rmd", ".html", basename(input_file))))})
+---
+
+```{r global_options, include = FALSE}
+knitr::opts_chunk$set(root.dir = "../",
+                      warning=FALSE, 
+                      message=FALSE)
+```
+
+Install packages:
+
+```{r install_packages, eval = FALSE}
+devtools::install_github("trias-project/trias")
+devtools::install_github("ropensci/rgbif")
+```
+
+Load libraries:
+
+```{r load_libraries}
+# Tidyverse packages
+library(dplyr)
+library(tidyr)
+library(magrittr)
+library(readr)
+library(stringr)
+library(purrr)
+# Other packages
+library(janitor)
+library(lazyeval)
+library(rgbif)
+library(trias)
+library(googlesheets)
+```
+
+Set file paths:
+
+```{r set_file_paths}
+# All downloads we've triggered are added to this file:
+downloads_output_file <- "../output/gbif_downloads_list.tsv"
+```
+
+This text file contains all informations about triggered downloads from GBIF.
+
+# Define taxa
+
+We are interested in all Chordata at this moment and there is no a unique worth-of-thrust checklist for all UKOTs.
+
+```{r define_taxa}
+taxa_input_file <- NA
+```
+
+## Upload list of countries
+
+A list of countries has been made by Oliver Scott in his [142--UKOT--horizon-scanning repository](https://github.com/sacrevert/142--UKOT--horizon-scanning). We import it as a data.frame
+
+```{r upload_country_list}
+country_list_file <- "../data/CaribbeanOT_links_GATS_and_PA_withISOs_v1.csv" # for offline use
+country_list_file <- "https://raw.githubusercontent.com/sacrevert/142--UKOT--horizon-scanning/master/data/CaribbeanOT_links_GATS_and_PA_withISOs_v1.csv" # for online use
+country_df <- read_csv(file = country_list_file)
+```
+
+Extract UKOTs with their corresponding country code:
+
+```{r extract_countries}
+countries_reporter2iso <- country_df %>% 
+  distinct(reporter2iso, reporter) %>% 
+  filter(!is.na(reporter2iso)) %>%
+  rename(country = reporter,
+         countryCode = reporter2iso)
+paste("UKOTs:", paste(countries_reporter2iso$country, collapse = ","))
+paste("UKOT country  codes: ", paste(countries_reporter2iso$countryCode,
+      collapse = ","))
+```
+
+# Download GBIF occurrences
+
+We spin up a download of occurrence data related to UKOT countries:
+
+```{r trigger_gbif_download_UKOT, eval = FALSE}
+gbif_download_key_UKOT <- occ_download(
+  paste0("country = ", 
+         paste(countries_reporter2iso$countryCode, collapse = ",")),
+  curlopts = list(verbose = TRUE))
+```
+
+**Note**: you need a valid GBIF account to trigger a download. You can save your credentials in environment file of R (`.Renviron` or `.Renviron.site`) as follows:
+
+```{r show_GIBF_credentials, eval = FALSE}
+gbif_user = "my_username"
+gbif_pwd = "my_password"
+gbif_email = "my_email_address"
+```
+
+```{r offline_import_key, results = "hide", echo = TRUE}
+gbif_download_key_UKOT <- "0008649-180412121330197"
+```
+
+Check status of the download:
+
+```{r retrieve_status_download}
+metadata_UKOT <- occ_download_meta(key = gbif_download_key_UKOT)
+metadata_UKOT$key
+metadata_UKOT$status
+```
+
+In case status is `RUNNING` or `PREPARING`, no worry: it takes time to retrieve so many observations. Take a coffie, a cup of tea or check your e-mails. Run the code above within a few minutes to check the status of your request. Once `metadata_UKOT$status` is `COMPLETED`, you are ready for downloading.
+
+Within [TrIAS project](https://github.com/trias-project) we are developing a packge called [`trias`](https://github.com/trias-project/trias). In this package there is a function to update a list of all triggered GBIF downloads. In this way we have a handful overview of all GBIF keys and details related to every download. In our case `input_checklist` value is `NA`.
+
+```{r _update_downloads}
+update_download_list(
+  file = downloads_output_file, 
+  download_to_add = gbif_download_key_UKOT, 
+  input_checklist = taxa_input_file)
+```
+
+## Import downloads to R
+
+It can be useful to import occurrence data directly in R. 
+You can do it by GBIF download key. In our case, for occurrence related to UKOT countries:
+
+```{r import_ocurrence_from_gbif_key_UKOT}
+gbif_key <- metadata_UKOT$key
+file_path <- "../output/"
+occ <- occ_download_get(key = gbif_key, overwrite = TRUE, path = file_path)
+file_to_extract <- "occurrence.txt"
+unzip(zipfile = occ, files = file_to_extract)
+file_name <- paste0(file_path, gbif_key, "_", file_to_extract)
+file.rename(file_to_extract,
+            file_name)
+occurrence_UKOT <- read_delim(file_name, 
+                         "\t", escape_double = FALSE, trim_ws = TRUE)
+```
+
+# Select species from checklists
+
+## IAS Caribbean database
+
+Import a reduced version of the IAS Caribbean database as provided by Oliver Scott.
+
+```{r import_iasDB}
+iasDb_file <- "../data/tabula-IASCaribDbReduced_FINAL.csv" # for offline use
+iasDb_file <-"https://raw.githubusercontent.com/sacrevert/142--UKOT--horizon-scanning/master/data/tabula-IASCaribDbReduced_FINAL.csv" # for online use
+iasDb <- read_csv(file = iasDb_file)
+```
+
+We clean it a little up
+```{r cleaned_up_version_iasDB}
+iasDb %<>% 
+  janitor::clean_names() %>% # standardize column names
+  rename(species = species_name) %>% #rename column species_name as species
+  slice(2:n()) %>% # remove first row containing subtitles
+  mutate(
+    exotic_in = str_replace(exotic_in,  # change Turks-Caicos to ISO name
+                            pattern = "Turks-Caicos", 
+                            replacement = "Turks and Caicos Islands"),
+    invasive_in = str_replace(invasive_in,
+                              pattern = "Turks-Caicos",
+                              replacement = "Turks and Caicos Islands")) %>%
+  distinct() %>% # remove duplicates
+  mutate(checklist = "Caribbean_IAS_db") # add checklist source tag
+head(iasDb)
+```
+
+
+Select vertebrates by column `organism_type`
+
+```{r filter_vertebrates}
+iasDb_vert <- iasDb %>% filter(str_detect(organism_type, pattern = "Vertebrate"))
+head(iasDb_vert)
+```
+
+## GRIIS
+
+We have also a partial checklist of invasive species for Anguilla  and Bermuda from [GRIIS](http://www.griis.org/) as a `.csv` file:
+
+```{r}
+griis_AI_BM <- read_csv2(
+  "../data/export_griis_Anguilla_Bermuda.csv") # for offline use
+griis_AI_BM %<>% janitor::clean_names()
+head(griis_AI_BM)
+```
+
+We select the Chordata (vertebrates) via GBIF taxonomy backbone:
+
+```{r select_Chordata_via_GBIF_backbone}
+alien <- griis_AI_BM %>% distinct(origin) %>% pull(origin) # origin = "Alien"
+griis_AI_BM <-  griis_AI_BM %>% 
+      rowwise() %>%
+      do_(interp(~ as.data.frame(name_usage(name = .$species,
+                                                     return = "data")))) %>%
+  distinct(species, phylum) %>%
+  mutate(checklist = "GRIIS",
+         origin = alien) %>% 
+  filter(!is.na(species))
+griis_AI_BM_vert <- griis_AI_BM %>% 
+  filter(str_to_lower(phylum) == str_to_lower("Chordata")) %>% 
+  select(species, checklist, origin, phylum)
+griis_AI_BM_vert
+```
+
+Doing it, we have removed the following species from GRIIS checklist:
+
+```{r not_chordata_from_griis}
+anti_join(griis_AI_BM %>% 
+            filter(!is.na(species)) %>%
+            filter(!is.na(phylum)) %>%
+            distinct(), 
+          griis_AI_BM_vert,
+          by = c("species", "checklist", "phylum"))
+```
+
+## CABI: Horizon scan of Cayman Islands
+
+Another source of information for this horizon scan is the CABI checklist made of all species which can be in the near future introduced in Cayman Islands. This checklist is saved in file `Horizon Scanning_20180516144937707_CABI_verts.csv`. We import it, *clean* it and we add the column `checklist`with value `CABI_KY`
+
+```{r import_file_horizon_scan}
+horizon_KY <- read_csv("../data/raw/Horizon Scanning_20180516144937707_CABI_verts.csv", skip = 5) %>%
+  janitor::clean_names() %>%
+  rename(species = preferred_scientific_name) %>%
+  mutate(checklist = "CABI_KY")
+horizon_KY
+```
+
+Which of them have been already observed in the Cayman Islands based on GBIF occurrences?
+
+```{r already_present_KY_occ_based}
+new_introductions_KY_occ <- inner_join(
+  horizon_KY %>% select(species),
+  occ_vert_invert_tidy %>% 
+    filter(countryCode == "NY" & !is.na(n)) %>%
+    select(species),
+  by = "species")
+new_introductions_KY_occ
+```
+
+Which of them have been labelled as invasive or exotic in the Caribbean Invasive Alien Species Database for Cayman Islands?
+
+```{r already_present_KY_checklist_based_invasive}
+new_introductions_KY_checklist <- horizon_KY %>% 
+  inner_join(unified_checklist_vert %>% 
+  filter(str_detect(invasive_in, "Cayman Islands") |
+           str_detect(exotic_in, "Cayman Islands")),
+  by = "species")
+new_introductions_KY_checklist
+```
+
+## Creation of a unified checklist
+
+We can now merge the three checklists for alien vertebrates. This unified checklist is clearly not a list of aliens in the horizon for all species, but it has to be considered as a starting point for the experts.
+
+```{r merge_lists_AS}
+unified_checklist_vert <- iasDb_vert %>% 
+  full_join(griis_AI_BM_vert, by = c("species", "checklist"))
+unified_checklist_vert %<>% 
+  full_join(horizon_KY, by = c("species", "checklist"))
+head(unified_checklist_vert) 
+```
+
+A fast check shows the overlapping degree of the checklists:
+
+```{r}
+print(paste("Number of vertebrates in IAS Caribbean database:",
+            nrow(iasDb_vert)))
+print(paste("Number of vertebrates in GRIIS checklist:",
+            nrow(griis_AI_BM_vert)))
+print(paste("Number of vertebrates in both databases:",
+            nrow(iasDb_vert %>% 
+                   filter(species %in% 
+                            (griis_AI_BM_vert %>% pull(species))))))
+```
+
+# Number of observations of alien species in each UKOT
+
+We use column `species` from `unified_checklist_vert` for searching observations in occurrence data.frame `occurrence_UKOT`. We are interested in counting how many observations are for each species in each UKOT:
+
+```{r}
+occ_vert_invert <- occurrence_UKOT %>% 
+  filter(species %in% 
+           unified_checklist_vert$species) %>%
+  group_by(species, countryCode) %>% 
+  count() %>% ungroup() %>% 
+  spread(key = countryCode, value = n) %>%
+  right_join(unified_checklist_vert,
+            by = "species")
+occ_vert_invert
+```
+
+Save file in a text file
+
+```{r save_tsv_file}
+write_tsv(occ_vert_invert, 
+          path = "../output/ias_UKOT_vertebrates_invertebrates.tsv")
+```
+
+Next time you work on these data, you can just directly load this file by:
+
+```{r load_tsv_file, eval = FALSE}
+occ_vert_invert <- 
+  read_tsv(file = "../output/ias_UKOT_vertebrates_invertebrates.tsv")
+```
+
+# Some considerations about checklist completeness
+
+In IAS Caribbean database there are two columns containing information about status of invasion: `invasive_in` and `exotic_in`. For example, `Passer domesticus` is considered exotic in 
+
+```{r example_exotic_iasDB}
+iasDb_vert %>% 
+  filter(species == "Passer domesticus") %>%
+  select(exotic_in)
+```
+
+and invasive in 
+
+```{r}
+iasDb_vert %>% 
+  filter(species == "Passer domesticus") %>%
+  select(invasive_in)
+```
+
+In GRIIS checklist for Anguilla and Bermuda all species share the same `origin` column value: `Alien`, so they have been all considered alien species by experts. Although occurrence data cannot negate such judge, they can still be used to find new potential alien species which are still not present in any alien species checklist.
+
+First of all, we select species and relative observation counts for each UKOT where number of occurrences is not NA and gather them in a tidy table (country code as column):
+
+```{r species_country_distr}
+occ_vert_invert_tidy <- occ_vert_invert %>% 
+  select(species, one_of(countries_reporter2iso$countryCode)) %>%
+  gather(key = "countryCode", value = "n", countries_reporter2iso$countryCode) %>%
+  filter(!is.na(n)) %>% 
+  distinct() %>% 
+  left_join(countries_reporter2iso, by = "countryCode")
+occ_vert_invert_tidy
+```
+
+Do GBIF occurrence data contain new information about alien (or exotic) species in UKOTs?
+
+The first simplest check is the following: find species in `occ_vert_invert_tidy` which are not present in `unified_checklist`:
+
+```{r species_not_in_unified_checklist}
+occ_vert_invert_tidy %>% distinct(species) %>% filter(! species %in% unified_checklist_vert$species)
+```
+
+Let's go more in details considering the occurrence data in each UKOT and the geographical information contained in checklists.
+
+```{r}
+gbif_invasive <- map_df(
+  countries_reporter2iso$country,
+  function(x) 
+    inner_join(occ_vert_invert_tidy %>% 
+                 filter(country == x),
+               unified_checklist_vert %>% 
+                 filter(!str_detect(exotic_in, x) &
+                          !str_detect(invasive_in, x) &
+                          is.na(origin)),
+               by = "species"))
+```
+
+Scrolling these lists per each country we can see that GBIF occurrences show that the unified checklist made by joining Caribbean IAS database and  Anguilla and Bermuda's GRIIS checklist are not udpated. We save them as tsv file:
+
+```{r GBIF_occ_not_in_checlists}
+write_tsv(gbif_invasive, 
+                 path = "../output/gbif_invasive_not_in_checklists.tsv")
+```
+
+The unified checklist, completed by these additional species found by GBIF, has been sent to local experts leaded by Tim Adriaens for a check. Their revision was helpful for removing synonyms, correcting habitat information, etc.
+We used a Google spreadsheet for doing it. 
+We can upload the most updated version using code here below:
+
+```{r get_most_udpated_longlist}
+my_sheets <- gs_ls()
+google_ssheet <- my_sheets %>% 
+  filter(str_detect(my_sheets$sheet_title, 
+                    pattern = "ias_UKOT_vertebrates_invertebrates"))
+google_ssheet %<>%
+  filter(updated == max(google_ssheet$updated)) # take the most updated version
+unified_checklist_vert <- gs_key(google_ssheet$sheet_key) %>% gs_read(ws = "longlist")
+unified_checklist_vert %<>% clean_names()
+```
